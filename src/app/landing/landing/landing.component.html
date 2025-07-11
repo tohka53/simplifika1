@@ -1,0 +1,665 @@
+<!-- src/app/landing/landing.component.html -->
+<div class="min-h-screen bg-white">
+  <!-- Navigation -->
+  <nav class="fixed top-0 w-full bg-white/95 backdrop-blur-sm shadow-sm z-50 navbar">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16">
+        <div class="flex items-center">
+          <div class="flex-shrink-0 flex items-center">
+            <div class="h-8 w-8 bg-blue-600 rounded-lg flex items-center justify-center mr-3">
+              <i class="fas fa-laptop-code text-white"></i>
+            </div>
+            <span class="text-xl font-bold text-gray-900">Simplifika</span>
+          </div>
+        </div>
+        
+        <div class="hidden md:block desktop-menu">
+          <div class="ml-10 flex items-baseline space-x-8">
+            <a (click)="scrollToSection('inicio')" class="text-gray-900 hover:text-blue-600 cursor-pointer transition-colors nav-link">Inicio</a>
+            <a (click)="scrollToSection('servicios')" class="text-gray-700 hover:text-blue-600 cursor-pointer transition-colors nav-link">Servicios</a>
+            <a (click)="scrollToSection('nosotros')" class="text-gray-700 hover:text-blue-600 cursor-pointer transition-colors nav-link">Nosotros</a>
+            <a (click)="scrollToSection('planes')" class="text-gray-700 hover:text-blue-600 cursor-pointer transition-colors nav-link">Planes</a>
+            <a (click)="scrollToSection('contacto')" class="text-gray-700 hover:text-blue-600 cursor-pointer transition-colors nav-link">Contacto</a>
+          </div>
+        </div>
+        
+        <div class="flex items-center space-x-4">
+          <button (click)="goToClientPortal()" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors btn-primary">
+            <i class="fas fa-user mr-2"></i>Portal Cliente
+          </button>
+          
+          <!-- Mobile menu button -->
+          <button (click)="toggleMobileMenu()" class="md:hidden text-gray-600 hover:text-blue-600">
+            <i class="fas fa-bars text-xl"></i>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Mobile menu -->
+      <div *ngIf="showMobileMenu" class="md:hidden bg-white border-t border-gray-200 mobile-menu">
+        <div class="px-2 pt-2 pb-3 space-y-1">
+          <a (click)="scrollToSection('inicio'); toggleMobileMenu()" class="block px-3 py-2 text-gray-700 hover:text-blue-600 cursor-pointer">Inicio</a>
+          <a (click)="scrollToSection('servicios'); toggleMobileMenu()" class="block px-3 py-2 text-gray-700 hover:text-blue-600 cursor-pointer">Servicios</a>
+          <a (click)="scrollToSection('nosotros'); toggleMobileMenu()" class="block px-3 py-2 text-gray-700 hover:text-blue-600 cursor-pointer">Nosotros</a>
+          <a (click)="scrollToSection('planes'); toggleMobileMenu()" class="block px-3 py-2 text-gray-700 hover:text-blue-600 cursor-pointer">Planes</a>
+          <a (click)="scrollToSection('contacto'); toggleMobileMenu()" class="block px-3 py-2 text-gray-700 hover:text-blue-600 cursor-pointer">Contacto</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section id="inicio" class="pt-16 bg-gradient-to-br from-gray-900 via-gray-800 to-black hero-section">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div class="slide-in-left">
+          <h1 class="text-4xl md:text-6xl font-bold text-white mb-6 hero-title">
+            Transforma tu
+            <span class="text-blue-500 gradient-text">Empresa</span>
+          </h1>
+          <p class="text-xl text-gray-300 mb-8 hero-subtitle">
+            Soluciones informáticas integrales para empresas en Guatemala. Simplificamos tus procesos, optimizamos tu tecnología y aceleramos tu crecimiento digital.
+          </p>
+          <div class="flex flex-col sm:flex-row gap-4 hero-buttons">
+            <button (click)="requestConsultation(); trackEvent('consultation_request', 'hero', 'primary_cta')" 
+                    class="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center btn-primary">
+              <i class="fas fa-rocket mr-2"></i>
+              Consulta Gratuita
+            </button>
+            <button (click)="scrollToSection('servicios')" 
+                    class="border border-blue-600 text-blue-500 px-8 py-3 rounded-lg hover:bg-blue-600 hover:text-white transition-colors btn-secondary">
+              Ver Servicios
+            </button>
+          </div>
+        </div>
+        
+        <div class="relative slide-in-right">
+          <div class="bg-white rounded-2xl shadow-2xl p-8 transform rotate-3 hover:rotate-0 transition-transform duration-300 hero-card image-overlay">
+            <img src="https://images.unsplash.com/photo-1551434678-e076c223a692?w=600&h=400&fit=crop" 
+                 alt="Equipo tecnológico" 
+                 class="rounded-xl w-full h-64 object-cover">
+            <div class="mt-4">
+              <h3 class="text-lg font-semibold text-gray-900">Tecnología de Vanguardia</h3>
+              <p class="text-gray-600">Soluciones que impulsan tu negocio</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Services Section -->
+  <section id="servicios" class="py-20 bg-white section-padding">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4 section-title">
+          Nuestros Servicios
+        </h2>
+        <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+          Soluciones tecnológicas completas para digitalizar y optimizar tu empresa
+        </p>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div *ngFor="let service of services; let i = index" 
+             class="bg-gray-50 rounded-xl p-6 hover:shadow-lg transition-shadow duration-300 hover:border-blue-200 border border-transparent service-card card-hover-effect"
+             [style.animation-delay.ms]="i * 200">
+          <div class="text-center">
+            <div class="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 service-icon">
+              <i [class]="service.icon + ' text-white text-2xl'"></i>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-900 mb-3">{{ service.title }}</h3>
+            <p class="text-gray-600 mb-4">{{ service.description }}</p>
+            <ul class="text-sm text-gray-500 space-y-1">
+              <li *ngFor="let feature of service.features">
+                <i class="fas fa-check text-blue-600 mr-2"></i>{{ feature }}
+              </li>
+            </ul>
+            <button (click)="showMoreInfo(service); trackEvent('service_info', 'services', service.title)" 
+                    class="mt-4 text-blue-600 hover:text-blue-800 font-medium transition-colors">
+              Más información →
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Call to Action for Services -->
+      <div class="text-center mt-12">
+        <p class="text-gray-600 mb-4">¿No encuentras lo que buscas?</p>
+        <button (click)="contactUs()" class="text-blue-600 hover:text-blue-800 font-medium">
+          Hablemos sobre tus necesidades específicas →
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- About Section -->
+  <section id="nosotros" class="py-20 bg-gray-100 section-padding">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div>
+          <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
+            Quiénes Somos
+          </h2>
+          <p class="text-lg text-gray-600 mb-6">
+            Simplifika es una empresa especializada en servicios informáticos ubicada en Guatemala. 
+            Con más de 8 años de experiencia, ayudamos a empresas a digitalizar sus procesos y alcanzar sus objetivos tecnológicos.
+          </p>
+          <div class="space-y-4">
+            <div class="flex items-start">
+              <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center mr-4 mt-1">
+                <i class="fas fa-certificate text-white text-sm"></i>
+              </div>
+              <div>
+                <h4 class="font-semibold text-gray-900">Expertos Certificados</h4>
+                <p class="text-gray-600">Nuestro equipo cuenta con certificaciones internacionales en tecnología</p>
+              </div>
+            </div>
+            <div class="flex items-start">
+              <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center mr-4 mt-1">
+                <i class="fas fa-clock text-white text-sm"></i>
+              </div>
+              <div>
+                <h4 class="font-semibold text-gray-900">Soporte 24/7</h4>
+                <p class="text-gray-600">Brindamos soporte técnico continuo para tu tranquilidad</p>
+              </div>
+            </div>
+            <div class="flex items-start">
+              <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center mr-4 mt-1">
+                <i class="fas fa-shield-alt text-white text-sm"></i>
+              </div>
+              <div>
+                <h4 class="font-semibold text-gray-900">Seguridad Garantizada</h4>
+                <p class="text-gray-600">Implementamos las mejores prácticas de ciberseguridad</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="relative">
+          <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600&h=500&fit=crop" 
+               alt="Equipo de trabajo" 
+               class="rounded-2xl shadow-2xl image-overlay">
+          <div class="absolute -bottom-6 -left-6 bg-white rounded-xl p-6 shadow-lg stat-counter">
+            <div class="flex items-center">
+              <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
+                <i class="fas fa-building text-blue-600 text-xl"></i>
+              </div>
+              <div>
+                <p class="text-2xl font-bold text-gray-900">200+</p>
+                <p class="text-sm text-gray-600">Empresas Transformadas</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Team Section -->
+      <div class="mt-20">
+        <h3 class="text-2xl md:text-3xl font-bold text-gray-900 text-center mb-12">
+          Nuestro Equipo
+        </h3>
+        
+        <div class="flex justify-center">
+          <div [ngClass]="getTeamGridClasses()" class="gap-8 max-w-6xl">
+            <div *ngFor="let member of team; let i = index" 
+                 class="bg-white rounded-xl p-8 shadow-lg hover:shadow-xl transition-shadow border border-gray-200 hover:border-blue-200 team-card card-hover-effect"
+                 [style.animation-delay.ms]="(i + 1) * 300">
+              <div class="text-center">
+                <img [src]="member.image" 
+                     [alt]="member.name" 
+                     class="w-32 h-32 rounded-full mx-auto mb-6 object-cover border-4 border-blue-100 team-avatar">
+                <h4 class="text-2xl font-semibold text-gray-900 mb-2">{{ member.name }}</h4>
+                <p class="text-blue-600 font-medium text-lg mb-3">{{ member.role }}</p>
+                <p class="text-gray-600 mb-2">{{ member.specialization }}</p>
+                <p class="text-gray-500 text-sm bg-gray-50 px-4 py-2 rounded-full inline-block team-experience-badge">
+                  {{ member.experience }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Certifications Section -->
+      <div class="mt-20">
+        <h3 class="text-2xl font-bold text-gray-900 text-center mb-8">
+          Nuestras Certificaciones
+        </h3>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div *ngFor="let cert of getCertifications()" class="text-center p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
+            <img [src]="cert.image" [alt]="cert.name" class="h-12 mx-auto mb-2 object-contain">
+            <p class="text-sm font-medium text-gray-900">{{ cert.name }}</p>
+            <p class="text-xs text-gray-500">{{ cert.description }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing Section -->
+  <section id="planes" class="py-20 bg-white section-padding">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          Nuestros Planes
+        </h2>
+        <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+          Soluciones escalables para empresas de todos los tamaños. Invierte en el futuro digital de tu empresa.
+        </p>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div *ngFor="let plan of pricingPlans; let i = index" 
+             [class]="'relative bg-white rounded-2xl shadow-lg border pricing-card card-hover-effect ' + (plan.popular ? 'border-blue-500 ring-2 ring-blue-500' : 'border-gray-200')"
+             [style.animation-delay.ms]="i * 200">
+          
+          <div *ngIf="plan.popular" class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+            <span class="bg-blue-600 text-white px-4 py-1 rounded-full text-sm font-medium">
+              Más Popular
+            </span>
+          </div>
+          
+          <div class="p-8">
+            <div class="text-center">
+              <h3 class="text-2xl font-bold text-gray-900 mb-4">{{ plan.name }}</h3>
+              <div class="mb-6">
+                <span class="text-4xl font-bold text-blue-600">{{ plan.price }}</span>
+                <span class="text-gray-600 ml-2">{{ plan.period }}</span>
+              </div>
+              
+              <ul class="space-y-3 mb-8">
+                <li *ngFor="let feature of plan.features" class="flex items-start">
+                  <i class="fas fa-check text-blue-600 mr-3 mt-1"></i>
+                  <span class="text-gray-700">{{ feature }}</span>
+                </li>
+              </ul>
+              
+              <button (click)="selectPlan(plan); trackEvent('plan_selection', 'pricing', plan.name)" 
+                      [class]="'w-full py-3 px-6 rounded-lg font-medium transition-colors ' + 
+                               (plan.popular ? 'bg-blue-600 text-white hover:bg-blue-700 btn-primary' : 'bg-gray-100 text-gray-900 hover:bg-gray-200')">
+                {{ plan.buttonText }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="text-center mt-12">
+        <p class="text-gray-600 mb-4">
+          ¿Necesitas una solución personalizada?
+        </p>
+        <button (click)="contactUs(); trackEvent('custom_solution_request', 'pricing')" 
+                class="text-blue-600 hover:text-blue-800 font-medium transition-colors">
+          Contáctanos para una consulta gratuita →
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials Section -->
+  <section class="py-20 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          Lo que dicen nuestros clientes
+        </h2>
+        <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+          Casos de éxito que demuestran el impacto de nuestras soluciones
+        </p>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div *ngFor="let testimonial of getFilteredTestimonials(); let i = index" 
+             class="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow border border-gray-200 card-hover-effect"
+             [style.animation-delay.ms]="i * 250">
+          <div class="flex items-center mb-4">
+            <img [src]="testimonial.image" 
+                 [alt]="testimonial.name" 
+                 class="w-12 h-12 rounded-full object-cover mr-4">
+            <div>
+              <h4 class="font-semibold text-gray-900">{{ testimonial.name }}</h4>
+              <p class="text-sm text-gray-600">{{ testimonial.position }}</p>
+              <p class="text-sm text-blue-600">{{ testimonial.company }}</p>
+            </div>
+          </div>
+          <p class="text-gray-700 mb-4">"{{ testimonial.testimonial }}"</p>
+          <div class="flex text-yellow-400">
+            <i *ngFor="let star of [].constructor(testimonial.rating)" class="fas fa-star"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section id="contacto" class="py-20 bg-gray-100 section-padding">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          Contáctanos
+        </h2>
+        <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+          Estamos listos para transformar tu empresa. Contáctanos para una consulta inicial gratuita.
+        </p>
+        
+        <!-- Business Hours Indicator -->
+        <div class="mt-4">
+          <span [class]="'inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ' + 
+                         (isCurrentlyOpen() ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800')">
+            <i [class]="'fas ' + (isCurrentlyOpen() ? 'fa-circle text-green-400' : 'fa-circle text-red-400') + ' mr-2'"></i>
+            {{ isCurrentlyOpen() ? 'Abierto ahora' : 'Cerrado - Soporte 24/7 disponible' }}
+          </span>
+        </div>
+      </div>
+      
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <div>
+          <div class="space-y-8">
+            <div class="flex items-start">
+              <div class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mr-4">
+                <i class="fas fa-map-marker-alt text-white"></i>
+              </div>
+              <div>
+                <h4 class="text-lg font-semibold text-gray-900 mb-2">Dirección</h4>
+                <p class="text-gray-600">
+                  {{ contactInfo.address.street }}<br>
+                  {{ contactInfo.address.detail }}<br>
+                  {{ contactInfo.address.city }}
+                </p>
+              </div>
+            </div>
+            
+            <div class="flex items-start">
+              <div class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mr-4">
+                <i class="fas fa-phone text-white"></i>
+              </div>
+              <div>
+                <h4 class="text-lg font-semibold text-gray-900 mb-2">Teléfono</h4>
+                <p class="text-gray-600">
+                  <a *ngFor="let phone of contactInfo.phones; let last = last" 
+                     (click)="callPhone(phone)" 
+                     class="hover:text-blue-600 cursor-pointer transition-colors">
+                    {{ phone }}<span *ngIf="!last"><br></span>
+                  </a>
+                </p>
+              </div>
+            </div>
+            
+            <div class="flex items-start">
+              <div class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mr-4">
+                <i class="fas fa-envelope text-white"></i>
+              </div>
+              <div>
+                <h4 class="text-lg font-semibold text-gray-900 mb-2">Email</h4>
+                <p class="text-gray-600">
+                  <a *ngFor="let email of contactInfo.emails; let last = last" 
+                     (click)="sendEmail(email)" 
+                     class="hover:text-blue-600 cursor-pointer transition-colors">
+                    {{ email }}<span *ngIf="!last"><br></span>
+                  </a>
+                </p>
+              </div>
+            </div>
+            
+            <div class="flex items-start">
+              <div class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mr-4">
+                <i class="fas fa-clock text-white"></i>
+              </div>
+              <div>
+                <h4 class="text-lg font-semibold text-gray-900 mb-2">Horarios</h4>
+                <p class="text-gray-600">
+                  {{ contactInfo.schedule.weekdays }}<br>
+                  {{ contactInfo.schedule.saturday }}<br>
+                  {{ contactInfo.schedule.support }}
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Quick Actions -->
+          <div class="mt-8 space-y-4">
+            <button (click)="scheduleDemonstration(); trackEvent('demo_request', 'contact')" 
+                    class="w-full bg-blue-100 text-blue-800 py-3 px-6 rounded-lg hover:bg-blue-200 transition-colors">
+              <i class="fas fa-calendar-alt mr-2"></i>
+              Programar Demostración
+            </button>
+            
+            <div *ngIf="getNextWebinar()" class="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
+              <h5 class="font-semibold text-gray-900 mb-2">Próximo Webinar Gratuito</h5>
+              <p class="text-sm text-gray-600 mb-2">{{ getNextWebinar().title }}</p>
+              <p class="text-xs text-gray-500 mb-3">{{ getNextWebinar().date }} a las {{ getNextWebinar().time }}</p>
+              <button (click)="registerWebinar()" 
+                      class="text-blue-600 hover:text-blue-800 font-medium text-sm">
+                Registrarse gratis →
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-white rounded-2xl shadow-lg p-8 contact-form">
+          <h3 class="text-2xl font-bold text-gray-900 mb-6">Solicita una consulta</h3>
+          <form #contactForm="ngForm" (ngSubmit)="onSubmitContactForm(contactForm.value)" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="form-group">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Nombre *</label>
+                <input type="text" 
+                       name="name"
+                       ngModel
+                       required
+                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent form-input"
+                       placeholder="Tu nombre completo">
+              </div>
+              <div class="form-group">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Empresa</label>
+                <input type="text" 
+                       name="company"
+                       ngModel
+                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent form-input"
+                       placeholder="Nombre de tu empresa">
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Email *</label>
+              <input type="email" 
+                     name="email"
+                     ngModel
+                     required
+                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent form-input"
+                     placeholder="tu@empresa.com">
+            </div>
+            
+            <div class="form-group">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Teléfono *</label>
+              <input type="tel" 
+                     name="phone"
+                     ngModel
+                     required
+                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent form-input"
+                     placeholder="+502 1234-5678">
+            </div>
+            
+            <div class="form-group">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Servicios de interés</label>
+              <select name="service" 
+                      ngModel
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent form-input">
+                <option value="">Selecciona un servicio</option>
+                <option *ngFor="let service of services" [value]="service.title">{{ service.title }}</option>
+                <option value="all">Todos los servicios</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Presupuesto estimado</label>
+              <select name="budget" 
+                      ngModel
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent form-input">
+                <option value="">Selecciona un rango</option>
+                <option value="under-5k">Menos de Q5,000</option>
+                <option value="5k-15k">Q5,000 - Q15,000</option>
+                <option value="15k-50k">Q15,000 - Q50,000</option>
+                <option value="over-50k">Más de Q50,000</option>
+                <option value="discuss">Prefiero discutirlo</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Mensaje *</label>
+              <textarea rows="4" 
+                        name="message"
+                        ngModel
+                        required
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent form-input" 
+                        placeholder="Cuéntanos sobre tu proyecto o necesidades tecnológicas..."></textarea>
+            </div>
+            
+            <div class="form-group">
+              <label class="flex items-center">
+                <input type="checkbox" 
+                       name="newsletter"
+                       ngModel
+                       class="mr-2 text-blue-600 focus:ring-blue-500">
+                <span class="text-sm text-gray-600">
+                  Suscribirme al newsletter mensual de tendencias tecnológicas
+                </span>
+              </label>
+            </div>
+            
+            <button type="submit" 
+                    [disabled]="isLoading || !contactForm.valid"
+                    [class]="'w-full py-3 px-6 rounded-lg font-medium transition-colors flex items-center justify-center ' + 
+                             (isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700') + ' text-white btn-primary'">
+              <div *ngIf="isLoading" class="loading-dots mr-2">
+                <div></div><div></div><div></div><div></div>
+              </div>
+              <i *ngIf="!isLoading" class="fas fa-paper-plane mr-2"></i>
+              {{ isLoading ? 'Enviando...' : 'Enviar Solicitud' }}
+            </button>
+          </form>
+          
+          <div class="mt-6 text-center">
+            <p class="text-sm text-gray-500">
+              Al enviar este formulario, aceptas nuestros términos de privacidad.
+              <br>Respuesta garantizada en menos de 24 horas.
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- FAQ Section -->
+      <div class="mt-20">
+        <h3 class="text-2xl font-bold text-gray-900 text-center mb-12">
+          Preguntas Frecuentes
+        </h3>
+        <div class="max-w-3xl mx-auto space-y-4">
+          <div *ngFor="let faq of getFAQs(); let i = index" 
+               class="bg-white rounded-lg shadow-sm border border-gray-200">
+            <button (click)="toggleFAQ(i)" 
+                    class="w-full px-6 py-4 text-left flex justify-between items-center hover:bg-gray-50 transition-colors">
+              <span class="font-medium text-gray-900">{{ faq.question }}</span>
+              <i [class]="'fas ' + (faq.isOpen ? 'fa-chevron-up' : 'fa-chevron-down') + ' text-gray-400'"></i>
+            </button>
+            <div *ngIf="faq.isOpen" class="px-6 pb-4">
+              <p class="text-gray-600">{{ faq.answer }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-gray-900 text-white py-12 footer">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div>
+          <div class="flex items-center mb-4">
+            <div class="h-8 w-8 bg-blue-600 rounded-lg flex items-center justify-center mr-3">
+              <i class="fas fa-laptop-code text-white"></i>
+            </div>
+            <span class="text-xl font-bold">Simplifika</span>
+          </div>
+          <p class="text-gray-400 mb-4">
+            Transformamos empresas a través de la tecnología. Soluciones integrales para el futuro digital de tu negocio.
+          </p>
+          
+          <!-- Newsletter Subscription -->
+          <div class="mt-4">
+            <h5 class="font-semibold mb-2">Newsletter</h5>
+            <div class="flex">
+              <input type="email" 
+                     #newsletterEmail
+                     placeholder="Tu email"
+                     class="flex-1 px-3 py-2 bg-gray-800 border border-gray-700 rounded-l-md text-white text-sm focus:outline-none focus:border-blue-500">
+              <button (click)="subscribeNewsletter(newsletterEmail.value); newsletterEmail.value=''" 
+                      class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-r-md transition-colors">
+                <i class="fas fa-arrow-right"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <div>
+          <h4 class="font-semibold mb-4">Servicios</h4>
+          <ul class="space-y-2 text-gray-400">
+            <li *ngFor="let service of services">
+              <a href="#servicios" 
+                 (click)="scrollToSection('servicios')" 
+                 class="hover:text-blue-400 transition-colors footer-link cursor-pointer">
+                {{ service.title }}
+              </a>
+            </li>
+          </ul>
+        </div>
+        
+        <div>
+          <h4 class="font-semibold mb-4">Enlaces</h4>
+          <ul class="space-y-2 text-gray-400">
+            <li><a (click)="scrollToSection('inicio')" class="hover:text-blue-400 transition-colors cursor-pointer footer-link">Inicio</a></li>
+            <li><a (click)="scrollToSection('nosotros')" class="hover:text-blue-400 transition-colors cursor-pointer footer-link">Nosotros</a></li>
+            <li><a (click)="scrollToSection('planes')" class="hover:text-blue-400 transition-colors cursor-pointer footer-link">Planes</a></li>
+            <li><a (click)="scrollToSection('contacto')" class="hover:text-blue-400 transition-colors cursor-pointer footer-link">Contacto</a></li>
+            <li><a href="#" class="hover:text-blue-400 transition-colors footer-link">Blog</a></li>
+            <li><a href="#" class="hover:text-blue-400 transition-colors footer-link">Casos de Éxito</a></li>
+          </ul>
+        </div>
+        
+        <div>
+          <h4 class="font-semibold mb-4">Síguenos</h4>
+          <div class="flex space-x-4 mb-4">
+            <a *ngFor="let social of socialLinks" 
+               (click)="openSocialLink(social.url); trackEvent('social_click', 'footer', social.name)" 
+               class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition-colors social-btn cursor-pointer">
+              <i [class]="social.icon"></i>
+            </a>
+          </div>
+          
+          <div class="mt-6">
+            <h5 class="font-semibold mb-2">Tecnologías</h5>
+            <div class="grid grid-cols-4 gap-2">
+              <div *ngFor="let tech of getTechnologies().slice(0, 8)" 
+                   class="text-gray-400 hover:text-blue-400 transition-colors text-center">
+                <i [class]="tech.icon + ' text-lg'"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="border-t border-gray-800 mt-12 pt-8">
+        <div class="flex flex-col md:flex-row justify-between items-center">
+          <p class="text-gray-400 text-center md:text-left">
+            &copy; {{ currentYear }} Simplifika. Todos los derechos reservados.
+          </p>
+          <div class="flex space-x-6 mt-4 md:mt-0">
+            <a href="#" class="text-gray-400 hover:text-blue-400 transition-colors text-sm footer-link">Política de Privacidad</a>
+            <a href="#" class="text-gray-400 hover:text-blue-400 transition-colors text-sm footer-link">Términos de Servicio</a>
+            <a href="#" class="text-gray-400 hover:text-blue-400 transition-colors text-sm footer-link">Cookies</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+</div>
