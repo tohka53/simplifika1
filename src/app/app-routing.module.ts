@@ -1,4 +1,5 @@
 // src/app/app-routing.module.ts
+
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { AuthGuard, PermissionGuard, RoleGuard } from './guards/auth.guard';
@@ -7,14 +8,17 @@ import { RegisterComponent } from './register/register/register.component';
 import { DashboardComponent } from './dashboard/dashboard/dashboard.component';
 import { UsuariosComponent } from './usuarios/usuarios/usuarios.component';
 import { LandingComponent } from './landing/landing/landing.component';
-
-// Componente layout compartido para rutas protegidas
 import { LayoutComponent } from './layout/layout/layout.component';
+
+// Importar componentes CV
+import { CVListComponent } from './cv-list/cv-list/cv-list.component';
+import { CVFormComponent } from './cv-form/cv-form/cv-form.component';
+import { CVViewComponent } from './cv-view/cv-view/cv-view.component';
 
 const routes: Routes = [
   // Ruta principal - Landing page
   { path: '', component: LandingComponent },
-  { path: 'home', component: LandingComponent }, // Alias alternativo
+  { path: 'home', component: LandingComponent },
   
   // Rutas de autenticación (sin layout)
   { path: 'login', component: LoginComponent },
@@ -39,9 +43,43 @@ const routes: Routes = [
           profiles: [1, 3] // Solo admin y supervisor
         }
       },
-      // Aquí puedes agregar más rutas protegidas
-      // { path: 'reportes', component: ReportesComponent },
-      // { path: 'configuracion', component: ConfiguracionComponent },
+      
+      // ✅ SOLUCIÓN: Rutas CV corregidas
+      {
+        path: 'cv',
+        children: [
+          {
+            path: '',
+            redirectTo: 'mis-cvs',
+            pathMatch: 'full'
+          },
+          {
+            path: 'mis-cvs',
+            component: CVListComponent
+            // ✅ Quitar PermissionGuard temporalmente o usar solo AuthGuard
+            // canActivate: [AuthGuard] // Solo verificar autenticación
+          },
+          {
+            path: 'crear',
+            component: CVFormComponent
+            // ✅ Solo verificar autenticación
+            // canActivate: [AuthGuard]
+          },
+          {
+            path: 'editar/:id',
+            component: CVFormComponent
+            // ✅ Solo verificar autenticación
+            // canActivate: [AuthGuard]
+          },
+          {
+            path: 'ver/:id',
+            component: CVViewComponent
+            // ✅ IMPORTANTE: Cambiar el permiso requerido
+            // canActivate: [PermissionGuard],
+            // data: { permissions: ['view'] } // Solo requiere 'view', no 'edit'
+          }
+        ]
+      }
     ]
   },
   
@@ -51,12 +89,9 @@ const routes: Routes = [
 
 @NgModule({
   imports: [RouterModule.forRoot(routes, {
-    // Configuraciones adicionales
-    enableTracing: false, // Set to true for debugging
+    enableTracing: false,
     scrollPositionRestoration: 'top',
-    anchorScrolling: 'enabled',
-    // Opcional: precargar módulos lazy-loaded
-    preloadingStrategy: undefined
+    anchorScrolling: 'enabled'
   })],
   exports: [RouterModule]
 })

@@ -1,0 +1,628 @@
+<!-- src/app/cv/cv-form/cv-form.component.html -->
+<div class="max-w-4xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+  
+  <!-- Header -->
+  <div class="mb-8">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">{{ getPageTitle() }}</h1>
+        <p class="mt-2 text-sm text-gray-600">
+          {{ isEditMode ? 'Modifica la información de tu curriculum vitae' : 'Completa la información para crear tu curriculum vitae' }}
+        </p>
+      </div>
+      <button
+        (click)="cancel()"
+        class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+      >
+        <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+        </svg>
+        Volver
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading && isEditMode" class="flex justify-center items-center h-64">
+    <div class="text-center">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+      <p class="mt-4 text-gray-600">Cargando CV...</p>
+    </div>
+  </div>
+
+  <!-- Formulario -->
+  <div *ngIf="!loading || !isEditMode">
+    <form (ngSubmit)="onSubmit()" #cvFormElement="ngForm" class="space-y-8">
+      
+      <!-- Información Básica -->
+      <div class="bg-white shadow rounded-lg p-6">
+        <h2 class="text-xl font-semibold text-gray-900 mb-6">Información Básica</h2>
+        
+        <div class="grid grid-cols-1 gap-6">
+          <!-- Nombre del CV -->
+          <div>
+            <label for="nombre" class="block text-sm font-medium text-gray-700 mb-2">
+              Nombre del CV <span class="text-red-500">*</span>
+            </label>
+            <input
+              id="nombre"
+              type="text"
+              [(ngModel)]="cvForm.nombre"
+              name="nombre"
+              required
+              maxlength="255"
+              placeholder="Ej: CV - Juan Pérez - Desarrollador"
+              class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+            />
+          </div>
+
+          <!-- Archivo PDF -->
+          <div>
+          
+            
+            <!-- Si ya hay archivo -->
+            <div *ngIf="cvForm.cv_pdf_url" class="mb-4 p-4 bg-green-50 border border-green-200 rounded-md">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                  <svg class="h-8 w-8 text-green-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                  </svg>
+                  <div>
+                    <p class="text-sm font-medium text-green-800">Archivo PDF subido</p>
+                    <p class="text-xs text-green-600">Archivo disponible para descarga</p>
+                  </div>
+                </div>
+                <div class="flex space-x-2">
+                  <a [href]="cvForm.cv_pdf_url" target="_blank" 
+                     class="text-green-600 hover:text-green-800 text-sm font-medium">
+                    Ver
+                  </a>
+                  <button type="button" (click)="removeFile()" 
+                          class="text-red-600 hover:text-red-800 text-sm font-medium">
+                    Eliminar
+                  </button>
+                </div>
+              </div>
+            </div>
+
+         
+          
+            
+            
+          </div>
+        </div>
+      </div>
+
+      <!-- Educación -->
+      <div class="bg-white shadow rounded-lg p-6">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-xl font-semibold text-gray-900">Educación</h2>
+          <button
+            type="button"
+            (click)="addEducacion()"
+            class="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          >
+            <svg class="-ml-0.5 mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+            </svg>
+            Agregar Educación
+          </button>
+        </div>
+
+        <div class="space-y-6">
+          <div 
+            *ngFor="let edu of cvForm.educacion; let i = index; trackBy: trackByIndex"
+            class="border border-gray-200 rounded-lg p-4 relative"
+          >
+            <button
+              type="button"
+              (click)="removeEducacion(i)"
+              class="absolute top-2 right-2 text-red-600 hover:text-red-800"
+              title="Eliminar educación"
+            >
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <!-- Institución -->
+              <div>
+                <label [for]="'edu_institucion_' + i" class="block text-sm font-medium text-gray-700 mb-1">
+                  Institución <span class="text-red-500">*</span>
+                </label>
+                <input
+                  [id]="'edu_institucion_' + i"
+                  type="text"
+                  [(ngModel)]="edu.institucion"
+                  [name]="'edu_institucion_' + i"
+                  required
+                  placeholder="Ej: Universidad de San Carlos"
+                  class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                />
+              </div>
+
+              <!-- Título Obtenido -->
+              <div>
+                <label [for]="'edu_titulo_' + i" class="block text-sm font-medium text-gray-700 mb-1">
+                  Título Obtenido <span class="text-red-500">*</span>
+                </label>
+                <input
+                  [id]="'edu_titulo_' + i"
+                  type="text"
+                  [(ngModel)]="edu.titulo_obtenido"
+                  [name]="'edu_titulo_' + i"
+                  required
+                  placeholder="Ej: Ingeniería en Sistemas"
+                  class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                />
+              </div>
+
+              <!-- Año Inicio -->
+              <div>
+                <label [for]="'edu_inicio_' + i" class="block text-sm font-medium text-gray-700 mb-1">
+                  Año de Inicio <span class="text-red-500">*</span>
+                </label>
+                <select
+                  [id]="'edu_inicio_' + i"
+                  [(ngModel)]="edu.anio_inicio"
+                  [name]="'edu_inicio_' + i"
+                  required
+                  class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                >
+                  <option value="">Seleccionar año</option>
+                  <option *ngFor="let year of availableYears" [value]="year">{{ year }}</option>
+                </select>
+              </div>
+
+              <!-- Año Finalización -->
+              <div>
+                <label [for]="'edu_fin_' + i" class="block text-sm font-medium text-gray-700 mb-1">
+                  Año de Finalización <span class="text-red-500">*</span>
+                </label>
+                <select
+                  [id]="'edu_fin_' + i"
+                  [(ngModel)]="edu.anio_finalizacion"
+                  [name]="'edu_fin_' + i"
+                  required
+                  class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                >
+                  <option value="">Seleccionar año</option>
+                  <option *ngFor="let year of availableYears" [value]="year">{{ year }}</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mensaje si no hay educación -->
+          <div *ngIf="cvForm.educacion.length === 0" class="text-center py-6 text-gray-500">
+            <p>No has agregado ninguna educación. Haz clic en "Agregar Educación" para comenzar.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Experiencia Laboral -->
+      <div class="bg-white shadow rounded-lg p-6">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-xl font-semibold text-gray-900">Experiencia Laboral</h2>
+          <button
+            type="button"
+            (click)="addExperiencia()"
+            class="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          >
+            <svg class="-ml-0.5 mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+            </svg>
+            Agregar Experiencia
+          </button>
+        </div>
+
+        <div class="space-y-6">
+          <div 
+            *ngFor="let exp of cvForm.experiencia_laboral; let i = index; trackBy: trackByIndex"
+            class="border border-gray-200 rounded-lg p-4 relative"
+          >
+            <button
+              type="button"
+              (click)="removeExperiencia(i)"
+              class="absolute top-2 right-2 text-red-600 hover:text-red-800"
+              title="Eliminar experiencia"
+            >
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <!-- Institución/Empresa -->
+              <div>
+                <label [for]="'exp_institucion_' + i" class="block text-sm font-medium text-gray-700 mb-1">
+                  Empresa/Institución <span class="text-red-500">*</span>
+                </label>
+                <input
+                  [id]="'exp_institucion_' + i"
+                  type="text"
+                  [(ngModel)]="exp.institucion"
+                  [name]="'exp_institucion_' + i"
+                  required
+                  placeholder="Ej: Tech Solutions GT"
+                  class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                />
+              </div>
+
+              <!-- Puesto Ejercido -->
+              <div>
+                <label [for]="'exp_puesto_' + i" class="block text-sm font-medium text-gray-700 mb-1">
+                  Puesto Ejercido <span class="text-red-500">*</span>
+                </label>
+                <input
+                  [id]="'exp_puesto_' + i"
+                  type="text"
+                  [(ngModel)]="exp.puesto_ejercido"
+                  [name]="'exp_puesto_' + i"
+                  required
+                  placeholder="Ej: Desarrollador Full Stack"
+                  class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                />
+              </div>
+
+              <!-- Año Inicio -->
+              <div>
+                <label [for]="'exp_inicio_' + i" class="block text-sm font-medium text-gray-700 mb-1">
+                  Año de Inicio <span class="text-red-500">*</span>
+                </label>
+                <select
+                  [id]="'exp_inicio_' + i"
+                  [(ngModel)]="exp.anio_inicio"
+                  [name]="'exp_inicio_' + i"
+                  required
+                  class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                >
+                  <option value="">Seleccionar año</option>
+                  <option *ngFor="let year of availableYears" [value]="year">{{ year }}</option>
+                </select>
+              </div>
+
+              <!-- Año Finalización -->
+              <div>
+                <label [for]="'exp_fin_' + i" class="block text-sm font-medium text-gray-700 mb-1">
+                  Año de Finalización <span class="text-red-500">*</span>
+                </label>
+                <select
+                  [id]="'exp_fin_' + i"
+                  [(ngModel)]="exp.anio_finalizacion"
+                  [name]="'exp_fin_' + i"
+                  required
+                  class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                >
+                  <option value="">Seleccionar año</option>
+                  <option *ngFor="let year of availableYears" [value]="year">{{ year }}</option>
+                </select>
+              </div>
+
+              <!-- Motivo de Retiro -->
+              <div class="md:col-span-2">
+                <label [for]="'exp_motivo_' + i" class="block text-sm font-medium text-gray-700 mb-1">
+                  Motivo de Retiro
+                </label>
+                <input
+                  [id]="'exp_motivo_' + i"
+                  type="text"
+                  [(ngModel)]="exp.motivo_retiro"
+                  [name]="'exp_motivo_' + i"
+                  placeholder="Ej: Búsqueda de crecimiento profesional"
+                  class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Mensaje si no hay experiencia -->
+          <div *ngIf="cvForm.experiencia_laboral.length === 0" class="text-center py-6 text-gray-500">
+            <p>No has agregado ninguna experiencia laboral. Haz clic en "Agregar Experiencia" para comenzar.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Idiomas -->
+      <div class="bg-white shadow rounded-lg p-6">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-xl font-semibold text-gray-900">Idiomas</h2>
+          <button
+            type="button"
+            (click)="addIdioma()"
+            class="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          >
+            <svg class="-ml-0.5 mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+            </svg>
+            Agregar Idioma
+          </button>
+        </div>
+
+        <div class="space-y-4">
+          <div 
+            *ngFor="let idioma of cvForm.idiomas; let i = index; trackBy: trackByIndex"
+            class="border border-gray-200 rounded-lg p-4 relative"
+          >
+            <button
+              type="button"
+              (click)="removeIdioma(i)"
+              class="absolute top-2 right-2 text-red-600 hover:text-red-800"
+              title="Eliminar idioma"
+            >
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <!-- Idioma -->
+              <div>
+                <label [for]="'idioma_nombre_' + i" class="block text-sm font-medium text-gray-700 mb-1">
+                  Idioma <span class="text-red-500">*</span>
+                </label>
+                <input
+                  [id]="'idioma_nombre_' + i"
+                  type="text"
+                  [(ngModel)]="idioma.idioma"
+                  [name]="'idioma_nombre_' + i"
+                  required
+                  placeholder="Ej: Inglés"
+                  class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                />
+              </div>
+
+              <!-- Nivel -->
+              <div>
+                <label [for]="'idioma_nivel_' + i" class="block text-sm font-medium text-gray-700 mb-1">
+                  Nivel <span class="text-red-500">*</span>
+                </label>
+                <select
+                  [id]="'idioma_nivel_' + i"
+                  [(ngModel)]="idioma.nivel"
+                  [name]="'idioma_nivel_' + i"
+                  required
+                  class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                >
+                  <option value="">Seleccionar nivel</option>
+                  <option *ngFor="let nivel of nivelesIdioma" [value]="nivel">{{ capitalize(nivel) }}</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mensaje si no hay idiomas -->
+          <div *ngIf="cvForm.idiomas.length === 0" class="text-center py-6 text-gray-500">
+            <p>No has agregado ningún idioma. Haz clic en "Agregar Idioma" para comenzar.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cursos y Certificaciones -->
+      <div class="bg-white shadow rounded-lg p-6">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-xl font-semibold text-gray-900">Cursos y Certificaciones</h2>
+          <button
+            type="button"
+            (click)="addCurso()"
+            class="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          >
+            <svg class="-ml-0.5 mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+            </svg>
+            Agregar Curso/Certificación
+          </button>
+        </div>
+
+        <div class="space-y-4">
+          <div 
+            *ngFor="let curso of cvForm.cursos_certificaciones_extra; let i = index; trackBy: trackByIndex"
+            class="border border-gray-200 rounded-lg p-4 relative"
+          >
+            <button
+              type="button"
+              (click)="removeCurso(i)"
+              class="absolute top-2 right-2 text-red-600 hover:text-red-800"
+              title="Eliminar curso/certificación"
+            >
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <!-- Nombre del Reconocimiento -->
+              <div>
+                <label [for]="'curso_nombre_' + i" class="block text-sm font-medium text-gray-700 mb-1">
+                  Nombre del Curso/Certificación <span class="text-red-500">*</span>
+                </label>
+                <input
+                  [id]="'curso_nombre_' + i"
+                  type="text"
+                  [(ngModel)]="curso.nombre_reconocimiento"
+                  [name]="'curso_nombre_' + i"
+                  required
+                  placeholder="Ej: Certificación AWS Solutions Architect"
+                  class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                />
+              </div>
+
+              <!-- Institución -->
+              <div>
+                <label [for]="'curso_institucion_' + i" class="block text-sm font-medium text-gray-700 mb-1">
+                  Institución <span class="text-red-500">*</span>
+                </label>
+                <input
+                  [id]="'curso_institucion_' + i"
+                  type="text"
+                  [(ngModel)]="curso.institucion"
+                  [name]="'curso_institucion_' + i"
+                  required
+                  placeholder="Ej: Amazon Web Services"
+                  class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                />
+              </div>
+
+              <!-- Año Realizado -->
+              <div>
+                <label [for]="'curso_anio_' + i" class="block text-sm font-medium text-gray-700 mb-1">
+                  Año Realizado <span class="text-red-500">*</span>
+                </label>
+                <select
+                  [id]="'curso_anio_' + i"
+                  [(ngModel)]="curso.anio_realizado"
+                  [name]="'curso_anio_' + i"
+                  required
+                  class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                >
+                  <option value="">Seleccionar año</option>
+                  <option *ngFor="let year of availableYears" [value]="year">{{ year }}</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mensaje si no hay cursos -->
+          <div *ngIf="cvForm.cursos_certificaciones_extra.length === 0" class="text-center py-6 text-gray-500">
+            <p>No has agregado ningún curso o certificación. Haz clic en "Agregar Curso/Certificación" para comenzar.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contactos y Referencias -->
+      <div class="bg-white shadow rounded-lg p-6">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-xl font-semibold text-gray-900">Contactos y Referencias</h2>
+          <button
+            type="button"
+            (click)="addContacto()"
+            class="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          >
+            <svg class="-ml-0.5 mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+            </svg>
+            Agregar Contacto
+          </button>
+        </div>
+
+        <div class="space-y-4">
+          <div 
+            *ngFor="let contacto of cvForm.contactos_referencias; let i = index; trackBy: trackByIndex"
+            class="border border-gray-200 rounded-lg p-4 relative"
+          >
+            <button
+              type="button"
+              (click)="removeContacto(i)"
+              class="absolute top-2 right-2 text-red-600 hover:text-red-800"
+              title="Eliminar contacto"
+            >
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <!-- Nombre y Apellido -->
+              <div>
+                <label [for]="'contacto_nombre_' + i" class="block text-sm font-medium text-gray-700 mb-1">
+                  Nombre y Apellido <span class="text-red-500">*</span>
+                </label>
+                <input
+                  [id]="'contacto_nombre_' + i"
+                  type="text"
+                  [(ngModel)]="contacto.nombre_apellido"
+                  [name]="'contacto_nombre_' + i"
+                  required
+                  placeholder="Ej: María Pérez García"
+                  class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                />
+              </div>
+
+              <!-- Número Telefónico -->
+              <div>
+                <label [for]="'contacto_telefono_' + i" class="block text-sm font-medium text-gray-700 mb-1">
+                  Número Telefónico <span class="text-red-500">*</span>
+                </label>
+                <input
+                  [id]="'contacto_telefono_' + i"
+                  type="tel"
+                  [(ngModel)]="contacto.numero_telefonico"
+                  [name]="'contacto_telefono_' + i"
+                  required
+                  placeholder="Ej: +502 1234-5678"
+                  class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                />
+              </div>
+
+              <!-- Parentesco -->
+              <div>
+                <label [for]="'contacto_parentesco_' + i" class="block text-sm font-medium text-gray-700 mb-1">
+                  Parentesco/Relación <span class="text-red-500">*</span>
+                </label>
+                <select
+                  [id]="'contacto_parentesco_' + i"
+                  [(ngModel)]="contacto.parentesco"
+                  [name]="'contacto_parentesco_' + i"
+                  required
+                  class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                >
+                  <option value="">Seleccionar relación</option>
+                  <option *ngFor="let tipo of tiposParentesco" [value]="tipo">{{ capitalize(tipo) }}</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mensaje si no hay contactos -->
+          <div *ngIf="cvForm.contactos_referencias.length === 0" class="text-center py-6 text-gray-500">
+            <p>No has agregado ningún contacto de referencia. Haz clic en "Agregar Contacto" para comenzar.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mensajes de Error y Éxito -->
+      <div *ngIf="error" class="bg-red-50 border border-red-200 rounded-md p-4">
+        <div class="flex">
+          <svg class="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <div class="ml-3">
+            <p class="text-sm text-red-700">{{ error }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="successMessage" class="bg-green-50 border border-green-200 rounded-md p-4">
+        <div class="flex">
+          <svg class="h-5 w-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <div class="ml-3">
+            <p class="text-sm text-green-700">{{ successMessage }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Botones de Acción -->
+      <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+        <button
+          type="button"
+          (click)="cancel()"
+          class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        >
+          Cancelar
+        </button>
+        
+        <button
+          type="submit"
+          [disabled]="loading || !cvFormElement.form.valid"
+          class="inline-flex justify-center items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <div *ngIf="loading" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+          {{ getSubmitButtonText() }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

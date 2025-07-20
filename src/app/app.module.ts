@@ -10,6 +10,9 @@ import { DashboardComponent } from './dashboard/dashboard/dashboard.component';
 import { UsuariosComponent } from './usuarios/usuarios/usuarios.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { LayoutComponent } from './layout/layout/layout.component';
+import { CVListComponent } from './cv-list/cv-list/cv-list.component';
+import { CVFormComponent } from './cv-form/cv-form/cv-form.component';
+import { CVViewComponent } from './cv-view/cv-view/cv-view.component';
 
 @NgModule({
   declarations: [
@@ -19,7 +22,10 @@ import { LayoutComponent } from './layout/layout/layout.component';
     RegisterComponent,
     DashboardComponent,
     UsuariosComponent,
-    LayoutComponent
+    LayoutComponent,
+    CVListComponent,
+    CVFormComponent,
+    CVViewComponent
   ],
   imports: [
     BrowserModule,
