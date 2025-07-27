@@ -13,6 +13,8 @@ import { LayoutComponent } from './layout/layout/layout.component';
 import { CVListComponent } from './cv-list/cv-list/cv-list.component';
 import { CVFormComponent } from './cv-form/cv-form/cv-form.component';
 import { CVViewComponent } from './cv-view/cv-view/cv-view.component';
+import { EmpresasComponent } from './empresas/empresas/empresas.component';
+import { GestionarEmpresasComponent } from './gestionar-empresas/gestionar-empresas/gestionar-empresas.component';
 
 @NgModule({
   declarations: [
@@ -25,7 +27,9 @@ import { CVViewComponent } from './cv-view/cv-view/cv-view.component';
     LayoutComponent,
     CVListComponent,
     CVFormComponent,
-    CVViewComponent
+    CVViewComponent,
+    EmpresasComponent,
+    GestionarEmpresasComponent
   ],
   imports: [
     BrowserModule,

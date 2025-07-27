@@ -14,6 +14,8 @@ import { LayoutComponent } from './layout/layout/layout.component';
 import { CVListComponent } from './cv-list/cv-list/cv-list.component';
 import { CVFormComponent } from './cv-form/cv-form/cv-form.component';
 import { CVViewComponent } from './cv-view/cv-view/cv-view.component';
+import { EmpresasComponent } from './empresas/empresas/empresas.component';
+import { GestionarEmpresasComponent } from './gestionar-empresas/gestionar-empresas/gestionar-empresas.component';
 
 const routes: Routes = [
   // Ruta principal - Landing page
@@ -41,6 +43,24 @@ const routes: Routes = [
         data: { 
           permissions: ['view', 'admin'],
           profiles: [1, 3] // Solo admin y supervisor
+        }
+      },
+
+       { 
+        path: 'empresas', 
+        component: EmpresasComponent,
+        canActivate: [PermissionGuard],
+        data: { 
+          permissions: ['view', 'admin'],
+          profiles: [1, 3] // Solo admin y supervisor
+        }
+      },
+      { 
+        path: 'gestionar-empresas', 
+        component: GestionarEmpresasComponent,
+        canActivate: [RoleGuard],
+        data: { 
+          profiles: [1, 3] // Solo Admin y Supervisores
         }
       },
       

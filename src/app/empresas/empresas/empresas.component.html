@@ -1,0 +1,737 @@
+<!-- src/app/empresas/empresas/empresas.component.html -->
+<div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+  
+  <!-- Header -->
+  <div class="mb-8">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">Gestión de Empresas</h1>
+        <p class="mt-2 text-sm text-gray-600">
+          Administra las empresas reclutadoras del sistema - Total: {{ empresas.length }}
+        </p>
+      </div>
+      <div class="flex space-x-2">
+        <button
+          (click)="refreshEmpresas()"
+          class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          title="Refrescar lista"
+        >
+          <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+          </svg>
+          Refrescar
+        </button>
+        <button
+          *ngIf="canCreate()"
+          (click)="openCreateModal()"
+          class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        >
+          <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+          </svg>
+          Nueva Empresa
+        </button>
+        <div *ngIf="!canCreate()" class="text-sm text-gray-500 italic">
+          Solo supervisores pueden crear empresas
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros y Búsqueda -->
+  <div class="bg-white rounded-lg shadow mb-6 p-6">
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+      <!-- Búsqueda -->
+      <div class="md:col-span-2">
+        <label for="search" class="block text-sm font-medium text-gray-700 mb-2">
+          Buscar
+        </label>
+        <div class="relative">
+          <input
+            id="search"
+            type="text"
+            [(ngModel)]="searchTerm"
+            (input)="onSearch()"
+            placeholder="Buscar por nombre, sector o dirección..."
+            class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+          />
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filtro por Estado -->
+      <div>
+        <label for="statusFilter" class="block text-sm font-medium text-gray-700 mb-2">
+          Estado
+        </label>
+        <select
+          id="statusFilter"
+          [(ngModel)]="statusFilter"
+          (change)="onFilterChange()"
+          class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+        >
+          <option value="all">Todas</option>
+          <option value="active">Activas</option>
+          <option value="inactive">Inactivas</option>
+        </select>
+      </div>
+
+      <!-- Filtro por Sector -->
+      <div>
+        <label for="sectorFilter" class="block text-sm font-medium text-gray-700 mb-2">
+          Sector
+        </label>
+        <select
+          id="sectorFilter"
+          [(ngModel)]="sectorFilter"
+          (change)="onFilterChange()"
+          class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+        >
+          <option value="all">Todos</option>
+          <option *ngFor="let sector of sectoresDisponibles" [value]="sector">{{ sector }}</option>
+        </select>
+      </div>
+
+      <!-- Filtro por Tamaño -->
+      <div>
+        <label for="tamanoFilter" class="block text-sm font-medium text-gray-700 mb-2">
+          Tamaño
+        </label>
+        <select
+          id="tamanoFilter"
+          [(ngModel)]="tamanoFilter"
+          (change)="onFilterChange()"
+          class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+        >
+          <option value="all">Todos</option>
+          <option *ngFor="let tamano of tamanosEmpresa" [value]="tamano">{{ getTamanoLegible(tamano) }}</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Botón para limpiar filtros -->
+    <div class="mt-4 flex justify-end">
+      <button
+        (click)="clearFilters()"
+        class="text-sm text-indigo-600 hover:text-indigo-800"
+      >
+        Limpiar filtros
+      </button>
+    </div>
+  </div>
+
+  <!-- Mensaje de Error -->
+  <div *ngIf="error" class="bg-red-50 border border-red-200 rounded-md p-4 mb-6">
+    <div class="flex">
+      <svg class="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      <div class="ml-3">
+        <p class="text-sm text-red-700">{{ error }}</p>
+      </div>
+      <div class="ml-auto pl-3">
+        <button
+          (click)="error = ''"
+          class="text-red-400 hover:text-red-600"
+        >
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="flex justify-center items-center h-64">
+    <div class="text-center">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+      <p class="mt-4 text-gray-600">Cargando empresas...</p>
+    </div>
+  </div>
+
+  <!-- Tabla de Empresas -->
+  <div *ngIf="!loading" class="bg-white shadow overflow-hidden sm:rounded-md">
+    <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+      <div class="flex justify-between items-center">
+        <h3 class="text-lg leading-6 font-medium text-gray-900">
+          Lista de Empresas ({{ filteredEmpresas.length }} de {{ empresas.length }})
+        </h3>
+        <span class="text-sm text-gray-500">
+          Mostrando {{ filteredEmpresas.length }} resultado{{ filteredEmpresas.length !== 1 ? 's' : '' }}
+        </span>
+      </div>
+    </div>
+    
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Empresa
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Sector / Tamaño
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Responsables
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Contacto
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Estado
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Acciones
+            </th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <tr *ngFor="let empresa of filteredEmpresas; trackBy: trackByEmpresaId" class="hover:bg-gray-50 transition-colors duration-150">
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="flex items-center">
+                <div class="h-12 w-12 flex-shrink-0">
+                  <div class="h-12 w-12 rounded-lg bg-indigo-100 flex items-center justify-center">
+                    <svg class="h-6 w-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-4m-5 0H9m0 0H5m0 0h2M7 7h10M7 11h4m6 0h2M7 15h10M7 19h4m6 0h2"></path>
+                    </svg>
+                  </div>
+                </div>
+                <div class="ml-4">
+                  <div class="text-sm font-medium text-gray-900">{{ empresa.nombre }}</div>
+                  <div class="text-sm text-gray-500">
+                    <span *ngIf="empresa.direccion">{{ empresa.direccion }}</span>
+                    <span *ngIf="!empresa.direccion">Sin dirección</span>
+                  </div>
+                  <div class="text-xs text-gray-400" *ngIf="empresa.sitio_web">
+                    <a [href]="empresa.sitio_web" target="_blank" class="hover:text-indigo-600">
+                      {{ empresa.sitio_web }}
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm text-gray-900">{{ empresa.sector || 'Sin especificar' }}</div>
+              <div class="text-sm text-gray-500">{{ getTamanoLegible(empresa.tamano_empresa) }}</div>
+            </td>
+            <td class="px-6 py-4">
+              <div class="text-sm text-gray-900">
+                <div *ngIf="empresa.responsables_info && empresa.responsables_info.length > 0; else noResponsables">
+                  <div *ngFor="let responsable of empresa.responsables_info" class="mb-1">
+                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                      {{ responsable.full_name || responsable.username }}
+                    </span>
+                  </div>
+                </div>
+                <ng-template #noResponsables>
+                  <span class="text-gray-400 italic">Sin responsables</span>
+                </ng-template>
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm text-gray-900">
+                <div *ngIf="empresa.telefono" class="flex items-center mb-1">
+                  <svg class="h-4 w-4 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                  </svg>
+                  {{ empresa.telefono }}
+                </div>
+                <div *ngIf="empresa.email" class="flex items-center">
+                  <svg class="h-4 w-4 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                  </svg>
+                  {{ empresa.email }}
+                </div>
+                <div *ngIf="!empresa.telefono && !empresa.email" class="text-gray-400 italic">
+                  Sin contacto
+                </div>
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                    [ngClass]="{
+                      'bg-green-100 text-green-800': empresa.status === 1,
+                      'bg-red-100 text-red-800': empresa.status === 0
+                    }">
+                <svg class="w-2 h-2 mr-1" fill="currentColor" viewBox="0 0 8 8">
+                  <circle cx="4" cy="4" r="3" />
+                </svg>
+                {{ getStatusText(empresa.status) }}
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+              <div class="flex justify-end space-x-2">
+                <!-- Botón Ver -->
+                <button
+                  class="text-indigo-600 hover:text-indigo-900 p-1 rounded hover:bg-indigo-50 transition-colors duration-150"
+                  title="Ver detalles"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                  </svg>
+                </button>
+
+                <!-- Botón Editar -->
+                <button
+                  *ngIf="canEdit()"
+                  (click)="openEditModal(empresa)"
+                  class="text-indigo-600 hover:text-indigo-900 p-1 rounded hover:bg-indigo-50 transition-colors duration-150"
+                  title="Editar empresa"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                  </svg>
+                </button>
+
+                <!-- Botón Activar/Desactivar -->
+                <button
+                  *ngIf="canEdit() && empresa.status === 1"
+                  (click)="deactivateEmpresa(empresa)"
+                  class="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50 transition-colors duration-150"
+                  title="Desactivar empresa"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18.364 5.636"/>
+                  </svg>
+                </button>
+
+                <button
+                  *ngIf="canEdit() && empresa.status === 0"
+                  (click)="reactivateEmpresa(empresa)"
+                  class="text-green-600 hover:text-green-900 p-1 rounded hover:bg-green-50 transition-colors duration-150"
+                  title="Reactivar empresa"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Empty State -->
+      <div *ngIf="filteredEmpresas.length === 0 && !loading" class="text-center py-12">
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-4m-5 0H9m0 0H5m0 0h2M7 7h10M7 11h4m6 0h2M7 15h10M7 19h4m6 0h2"></path>
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">No hay empresas</h3>
+        <p class="mt-1 text-sm text-gray-500">
+          {{ empresas.length === 0 ? 'No se encontraron empresas en la base de datos.' : 'No se encontraron empresas con los filtros aplicados.' }}
+        </p>
+        <div class="mt-6">
+          <button
+            *ngIf="empresas.length === 0 && canCreate()"
+            (click)="openCreateModal()"
+            class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          >
+            Crear primera empresa
+          </button>
+          <button
+            *ngIf="empresas.length > 0"
+            (click)="clearFilters()"
+            class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          >
+            Limpiar filtros
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para Crear/Editar Empresa -->
+<div *ngIf="showModal" class="fixed inset-0 z-50 overflow-y-auto">
+  <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+    <!-- Backdrop -->
+    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" (click)="closeModal()"></div>
+
+    <!-- Modal Panel -->
+    <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+    
+    <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+      <!-- Modal Header -->
+      <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+        <div class="sm:flex sm:items-start">
+          <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-indigo-100 sm:mx-0 sm:h-10 sm:w-10">
+            <svg class="h-6 w-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-4m-5 0H9m0 0H5m0 0h2M7 7h10M7 11h4m6 0h2M7 15h10M7 19h4m6 0h2"></path>
+            </svg>
+          </div>
+          <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+            <h3 class="text-lg leading-6 font-medium text-gray-900">
+              {{ modalMode === 'create' ? 'Crear Nueva Empresa' : 'Editar Empresa' }}
+            </h3>
+            <div class="mt-2">
+              <p class="text-sm text-gray-500">
+                {{ modalMode === 'create' ? 'Complete los datos para registrar una nueva empresa.' : 'Modifique los datos de la empresa seleccionada.' }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="bg-white px-4 pb-4 sm:px-6 max-h-96 overflow-y-auto">
+        <form class="space-y-6">
+          <!-- Información Básica -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Nombre -->
+            <div class="md:col-span-2">
+              <label for="nombre" class="block text-sm font-medium text-gray-700">
+                Nombre de la Empresa <span class="text-red-500">*</span>
+              </label>
+              <input
+                id="nombre"
+                type="text"
+                [(ngModel)]="empresaForm.nombre"
+                name="nombre"
+                required
+                placeholder="Ej: TechCorp Guatemala"
+                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              />
+            </div>
+
+            <!-- Sector -->
+            <div>
+              <label for="sector" class="block text-sm font-medium text-gray-700">
+                Sector <span class="text-red-500">*</span>
+              </label>
+              <select
+                id="sector"
+                [(ngModel)]="empresaForm.sector"
+                name="sector"
+                required
+                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              >
+                <option value="">Seleccionar sector</option>
+                <option *ngFor="let sector of sectoresDisponibles" [value]="sector">{{ sector }}</option>
+              </select>
+            </div>
+
+            <!-- Tamaño -->
+            <div>
+              <label for="tamano" class="block text-sm font-medium text-gray-700">
+                Tamaño de Empresa
+              </label>
+              <select
+                id="tamano"
+                [(ngModel)]="empresaForm.tamano_empresa"
+                name="tamano"
+                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              >
+                <option *ngFor="let tamano of tamanosEmpresa" [value]="tamano">{{ getTamanoLegible(tamano) }}</option>
+              </select>
+            </div>
+
+            <!-- Dirección -->
+            <div class="md:col-span-2">
+              <label for="direccion" class="block text-sm font-medium text-gray-700">
+                Dirección
+              </label>
+              <input
+                id="direccion"
+                type="text"
+                [(ngModel)]="empresaForm.direccion"
+                name="direccion"
+                placeholder="Ej: Zona 10, 6a Avenida 12-25"
+                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              />
+            </div>
+
+            <!-- Teléfono -->
+            <div>
+              <label for="telefono" class="block text-sm font-medium text-gray-700">
+                Teléfono
+              </label>
+              <input
+                id="telefono"
+                type="tel"
+                [(ngModel)]="empresaForm.telefono"
+                name="telefono"
+                placeholder="+502 2234-5678"
+                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              />
+            </div>
+
+            <!-- Email -->
+            <div>
+              <label for="email" class="block text-sm font-medium text-gray-700">
+                Email
+              </label>
+              <input
+                id="email"
+                type="email"
+                [(ngModel)]="empresaForm.email"
+                name="email"
+                placeholder="contacto@empresa.com"
+                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              />
+            </div>
+
+            <!-- Sitio Web -->
+            <div class="md:col-span-2">
+              <label for="sitio_web" class="block text-sm font-medium text-gray-700">
+                Sitio Web
+              </label>
+              <input
+                id="sitio_web"
+                type="url"
+                [(ngModel)]="empresaForm.sitio_web"
+                name="sitio_web"
+                placeholder="https://www.empresa.com"
+                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              />
+            </div>
+
+            <!-- Descripción -->
+            <div class="md:col-span-2">
+              <label for="descripcion" class="block text-sm font-medium text-gray-700">
+                Descripción de la Empresa
+              </label>
+              <textarea
+                id="descripcion"
+                rows="3"
+                [(ngModel)]="empresaForm.descripcion.descripcion"
+                name="descripcion"
+                placeholder="Describe la empresa, sus servicios, misión, etc."
+                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              ></textarea>
+            </div>
+
+            <!-- Estado -->
+            <div>
+              <label for="status" class="block text-sm font-medium text-gray-700">
+                Estado
+              </label>
+              <select
+                id="status"
+                [(ngModel)]="empresaForm.status"
+                name="status"
+                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              >
+                <option value="1">Activa</option>
+                <option value="0">Inactiva</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Responsables -->
+          <!-- SECCIÓN MODIFICADA: Responsables - Solo mostrar supervisores -->
+<div class="mt-6">
+  <label class="block text-sm font-medium text-gray-700 mb-3">
+    Responsables de la Empresa
+    <span class="text-xs text-gray-500">(Solo usuarios con perfil de Supervisor)</span>
+  </label>
+  
+  <!-- Alerta si no hay supervisores disponibles -->
+  <div *ngIf="!haySupervisoresDisponibles()" class="bg-yellow-50 border border-yellow-200 rounded-md p-4 mb-4">
+    <div class="flex">
+      <svg class="h-5 w-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16c-.77.833.192 2.5 1.732 2.5z"/>
+      </svg>
+      <div class="ml-3">
+        <p class="text-sm text-yellow-700">
+          <strong>No hay usuarios con perfil de Supervisor disponibles.</strong><br>
+          Para asignar responsables, debe crear al menos un usuario con perfil de Supervisor (perfil 3) primero.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Info sobre supervisores disponibles -->
+  <div *ngIf="haySupervisoresDisponibles()" class="bg-blue-50 border border-blue-200 rounded-md p-3 mb-4">
+    <div class="flex items-center">
+      <svg class="h-5 w-5 text-blue-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      <p class="text-sm text-blue-700">
+        {{ getConteoSupervisores() }} supervisor{{ getConteoSupervisores() !== 1 ? 'es' : '' }} disponible{{ getConteoSupervisores() !== 1 ? 's' : '' }} para asignar como responsable{{ getConteoSupervisores() !== 1 ? 's' : '' }}.
+      </p>
+    </div>
+  </div>
+
+  <!-- Grid de supervisores disponibles -->
+  <div *ngIf="haySupervisoresDisponibles()" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-32 overflow-y-auto border border-gray-200 rounded-md p-3">
+    <div *ngFor="let usuario of usuariosSupervisores" class="flex items-center">
+      <input
+        type="checkbox"
+        [id]="'responsable-' + usuario.id"
+        [checked]="isResponsableSelected(usuario.id!)"
+        (change)="toggleResponsable(usuario.id!)"
+        class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+      />
+      <label [for]="'responsable-' + usuario.id" class="ml-2 text-sm text-gray-700 cursor-pointer">
+        {{ usuario.full_name || usuario.username }}
+        <span class="text-xs text-blue-600 font-medium">({{ getPerfilName(usuario.id_perfil) }})</span>
+        <span class="text-xs text-gray-500 block">{{ usuario.username }}</span>
+      </label>
+    </div>
+  </div>
+
+  <!-- Mensaje cuando no hay supervisores seleccionados -->
+  <div *ngIf="haySupervisoresDisponibles() && empresaForm.responsables.length === 0" class="mt-2">
+    <p class="text-xs text-gray-500 italic">
+      No hay responsables asignados. Seleccione al menos un supervisor para gestionar esta empresa.
+    </p>
+  </div>
+
+  <!-- Resumen de responsables seleccionados -->
+  <div *ngIf="empresaForm.responsables.length > 0" class="mt-3 p-2 bg-green-50 rounded-md border border-green-200">
+    <p class="text-xs text-green-700">
+      <strong>Responsables seleccionados:</strong> {{ empresaForm.responsables.length }}
+    </p>
+    <div class="flex flex-wrap gap-1 mt-1">
+      <span *ngFor="let responsableId of empresaForm.responsables" 
+            class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+        {{ getNombreUsuario(responsableId) }}
+      </span>
+    </div>
+  </div>
+
+  <!-- Información adicional -->
+  <p class="mt-2 text-xs text-gray-500">
+    Solo los usuarios con perfil de <strong>Supervisor</strong> pueden ser asignados como responsables de empresas.
+    Los responsables podrán gestionar la información de la empresa y ver candidatos asociados.
+  </p>
+</div>
+
+          <!-- Contactos de Referencia -->
+          <div class="mt-6">
+            <label class="block text-sm font-medium text-gray-700 mb-3">
+              Contactos de Referencia
+            </label>
+            
+            <!-- Lista de contactos existentes -->
+            <div *ngIf="empresaForm.contactos_referencias.length > 0" class="mb-4 space-y-2">
+              <div *ngFor="let contacto of empresaForm.contactos_referencias; let i = index" 
+                   class="bg-gray-50 p-3 rounded-md border border-gray-200">
+                <div class="flex justify-between items-start">
+                  <div class="flex-1">
+                    <div class="text-sm font-medium text-gray-900">{{ contacto.nombre }}</div>
+                    <div class="text-xs text-gray-600">{{ contacto.cargo }}</div>
+                    <div class="text-xs text-gray-500 mt-1">
+                      <span *ngIf="contacto.telefono">📞 {{ contacto.telefono }}</span>
+                      <span *ngIf="contacto.telefono && contacto.email"> | </span>
+                      <span *ngIf="contacto.email">✉️ {{ contacto.email }}</span>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    (click)="removerContacto(i)"
+                    class="text-red-600 hover:text-red-800 p-1"
+                    title="Eliminar contacto"
+                  >
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Formulario para agregar nuevo contacto -->
+            <div class="bg-blue-50 p-4 rounded-md border border-blue-200">
+              <h4 class="text-sm font-medium text-gray-900 mb-3">Agregar Nuevo Contacto</h4>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div>
+                  <input
+                    type="text"
+                    [(ngModel)]="nuevoContacto.nombre"
+                    name="nuevoContactoNombre"
+                    placeholder="Nombre completo"
+                    class="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  />
+                </div>
+                <div>
+                  <input
+                    type="text"
+                    [(ngModel)]="nuevoContacto.cargo"
+                    name="nuevoContactoCargo"
+                    placeholder="Cargo/Posición"
+                    class="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  />
+                </div>
+                <div>
+                  <input
+                    type="tel"
+                    [(ngModel)]="nuevoContacto.telefono"
+                    name="nuevoContactoTelefono"
+                    placeholder="Teléfono"
+                    class="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  />
+                </div>
+                <div>
+                  <input
+                    type="email"
+                    [(ngModel)]="nuevoContacto.email"
+                    name="nuevoContactoEmail"
+                    placeholder="Email"
+                    class="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  />
+                </div>
+              </div>
+              <div class="mt-3 flex justify-end">
+                <button
+                  type="button"
+                  (click)="agregarContacto()"
+                  [disabled]="!nuevoContacto.nombre || !nuevoContacto.cargo"
+                  class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                  </svg>
+                  Agregar Contacto
+                </button>
+              </div>
+            </div>
+          </div>
+        </form>
+
+        <!-- Error Message -->
+        <div *ngIf="error" class="mt-4 bg-red-50 border border-red-200 rounded-md p-3">
+          <div class="flex">
+            <svg class="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <div class="ml-3">
+              <p class="text-sm text-red-700">{{ error }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+        <button
+          type="button"
+          (click)="saveEmpresa()"
+          class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+          [disabled]="!empresaForm.nombre || !empresaForm.sector"
+        >
+          <svg *ngIf="loading" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+          </svg>
+          {{ modalMode === 'create' ? 'Crear Empresa' : 'Guardar Cambios' }}
+        </button>
+        <button
+          type="button"
+            (click)="closeModal()"
+          type="button"
+          (click)="closeModal()"
+          class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+        >
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
