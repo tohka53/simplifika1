@@ -16,6 +16,14 @@ import { CVFormComponent } from './cv-form/cv-form/cv-form.component';
 import { CVViewComponent } from './cv-view/cv-view/cv-view.component';
 import { EmpresasComponent } from './empresas/empresas/empresas.component';
 import { GestionarEmpresasComponent } from './gestionar-empresas/gestionar-empresas/gestionar-empresas.component';
+import { GestionarEmpleosComponent } from './gestionar-empleos/gestionar-empleos/gestionar-empleos.component';
+
+// =============================================
+// IMPORTAR COMPONENTES DE POSTULACIONES - CORREGIDO PARA TU ESTRUCTURA ✅
+// =============================================
+import { MisAplicacionesComponent } from './mis-aplicaciones/mis-aplicaciones/mis-aplicaciones.component';
+import { BuscarEmpleosComponent } from './buscar-empleos/buscar-empleos/buscar-empleos.component';
+import { RevisarCandidatosComponent } from './revisar-candidatos/revisar-candidatos/revisar-candidatos.component';
 
 const routes: Routes = [
   // Ruta principal - Landing page
@@ -36,6 +44,10 @@ const routes: Routes = [
         path: 'dashboard', 
         component: DashboardComponent
       },
+      
+      // =============================================
+      // MÓDULO DE USUARIOS
+      // =============================================
       { 
         path: 'usuarios', 
         component: UsuariosComponent,
@@ -46,7 +58,10 @@ const routes: Routes = [
         }
       },
 
-       { 
+      // =============================================
+      // MÓDULO DE EMPRESAS
+      // =============================================
+      { 
         path: 'empresas', 
         component: EmpresasComponent,
         canActivate: [PermissionGuard],
@@ -63,8 +78,63 @@ const routes: Routes = [
           profiles: [1, 3] // Solo Admin y Supervisores
         }
       },
-      
-      // ✅ SOLUCIÓN: Rutas CV corregidas
+
+      // =============================================
+      // MÓDULO DE EMPLEOS
+      // =============================================
+      {
+        path: 'empleos',
+        children: [
+          {
+            path: '',
+            redirectTo: 'lista',
+            pathMatch: 'full'
+          },
+          {
+            path: 'lista',
+            component: GestionarEmpleosComponent,
+            canActivate: [RoleGuard],
+            data: { 
+              title: 'Gestión de Empleos',
+              profiles: [1, 3] // Solo Admin y Supervisor/RRHH
+            }
+          },
+          {
+            path: 'crear',
+            component: GestionarEmpleosComponent,
+            canActivate: [RoleGuard],
+            data: { 
+              title: 'Crear Empleo',
+              profiles: [1, 3],
+              mode: 'create'
+            }
+          },
+          {
+            path: 'editar/:id',
+            component: GestionarEmpleosComponent,
+            canActivate: [RoleGuard],
+            data: { 
+              title: 'Editar Empleo',
+              profiles: [1, 3],
+              mode: 'edit'
+            }
+          },
+          {
+            path: 'ver/:id',
+            component: GestionarEmpleosComponent,
+            canActivate: [RoleGuard],
+            data: { 
+              title: 'Ver Empleo',
+              profiles: [1, 3],
+              mode: 'view'
+            }
+          }
+        ]
+      },
+
+      // =============================================
+      // MÓDULO DE CV
+      // =============================================
       {
         path: 'cv',
         children: [
@@ -75,28 +145,135 @@ const routes: Routes = [
           },
           {
             path: 'mis-cvs',
-            component: CVListComponent
-            // ✅ Quitar PermissionGuard temporalmente o usar solo AuthGuard
-            // canActivate: [AuthGuard] // Solo verificar autenticación
+            component: CVListComponent,
+            canActivate: [AuthGuard], // Solo verificar autenticación
+            data: {
+              title: 'Mis CVs'
+            }
           },
           {
             path: 'crear',
-            component: CVFormComponent
-            // ✅ Solo verificar autenticación
-            // canActivate: [AuthGuard]
+            component: CVFormComponent,
+            canActivate: [AuthGuard],
+            data: {
+              title: 'Crear CV'
+            }
           },
           {
             path: 'editar/:id',
-            component: CVFormComponent
-            // ✅ Solo verificar autenticación
-            // canActivate: [AuthGuard]
+            component: CVFormComponent,
+            canActivate: [AuthGuard],
+            data: {
+              title: 'Editar CV'
+            }
           },
           {
             path: 'ver/:id',
-            component: CVViewComponent
-            // ✅ IMPORTANTE: Cambiar el permiso requerido
-            // canActivate: [PermissionGuard],
-            // data: { permissions: ['view'] } // Solo requiere 'view', no 'edit'
+            component: CVViewComponent,
+            canActivate: [AuthGuard],
+            data: {
+              title: 'Ver CV'
+            }
+          }
+        ]
+      },
+
+      // =============================================
+      // MÓDULO DE POSTULACIONES ✅
+      // =============================================
+      {
+        path: 'postulaciones',
+        children: [
+          {
+            path: '',
+            redirectTo: 'mis-aplicaciones',
+            pathMatch: 'full'
+          },
+          {
+            path: 'mis-aplicaciones',
+            component: MisAplicacionesComponent,
+            canActivate: [AuthGuard],
+            data: {
+              title: 'Mis Aplicaciones',
+              description: 'Seguimiento de tus postulaciones enviadas'
+            }
+          },
+          {
+            path: 'buscar-empleos',
+            component: BuscarEmpleosComponent,
+            canActivate: [AuthGuard],
+            data: {
+              title: 'Buscar Empleos',
+              description: 'Encuentra tu próxima oportunidad laboral'
+            }
+          },
+          {
+            path: 'revisar-candidatos',
+            component: RevisarCandidatosComponent,
+            canActivate: [RoleGuard],
+            data: {
+              title: 'Revisar Candidatos',
+              description: 'Gestiona las aplicaciones recibidas',
+              profiles: [1, 3] // Solo Admin y Supervisor/RRHH
+            }
+          },
+          // Rutas adicionales del módulo postulaciones
+          {
+            path: 'empleo/:id',
+            component: BuscarEmpleosComponent,
+            canActivate: [AuthGuard],
+            data: {
+              title: 'Detalle del Empleo',
+              mode: 'detail'
+            }
+          },
+          {
+            path: 'categoria/:categoria',
+            component: BuscarEmpleosComponent,
+            canActivate: [AuthGuard],
+            data: {
+              title: 'Empleos por Categoría',
+              mode: 'category'
+            }
+          },
+          {
+            path: 'empresa/:empresaId',
+            component: BuscarEmpleosComponent,
+            canActivate: [AuthGuard],
+            data: {
+              title: 'Empleos por Empresa',
+              mode: 'company'
+            }
+          }
+        ]
+      },
+
+      // =============================================
+      // RUTAS DE PERFIL DE USUARIO
+      // =============================================
+      {
+        path: 'perfil',
+        children: [
+          {
+            path: '',
+            redirectTo: 'mi-perfil',
+            pathMatch: 'full'
+          },
+          {
+            path: 'mi-perfil',
+            component: CVFormComponent, // Temporalmente, luego crear PerfilComponent
+            canActivate: [AuthGuard],
+            data: {
+              title: 'Mi Perfil'
+            }
+          },
+          {
+            path: 'cambiar-password',
+            component: CVFormComponent, // Temporalmente
+            canActivate: [AuthGuard],
+            data: {
+              title: 'Cambiar Contraseña'
+            }
           }
         ]
       }
@@ -109,9 +286,13 @@ const routes: Routes = [
 
 @NgModule({
   imports: [RouterModule.forRoot(routes, {
-    enableTracing: false,
+    enableTracing: false, // Cambiar a true para debugging
     scrollPositionRestoration: 'top',
-    anchorScrolling: 'enabled'
+    anchorScrolling: 'enabled',
+    // Configuraciones adicionales para mejorar la experiencia
+    onSameUrlNavigation: 'reload',
+    // Opcional: estrategia de precarga para mejorar rendimiento
+    // preloadingStrategy: PreloadAllModules
   })],
   exports: [RouterModule]
 })

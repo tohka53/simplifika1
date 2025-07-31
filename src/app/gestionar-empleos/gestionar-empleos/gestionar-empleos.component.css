@@ -1,0 +1,460 @@
+/* gestionar-empleos.component.css */
+
+/* Estilos para las tarjetas de estadísticas */
+.stat-card {
+  @apply bg-white rounded-lg shadow-sm border border-gray-200 p-6 transition-all duration-200 hover:shadow-md;
+}
+
+.stat-card-icon {
+  @apply w-12 h-12 rounded-lg flex items-center justify-center text-white text-xl;
+}
+
+.stat-card-value {
+  @apply text-2xl font-bold text-gray-900 mt-2;
+}
+
+.stat-card-label {
+  @apply text-sm text-gray-600 mt-1;
+}
+
+/* Estilos para filtros */
+.filter-container {
+  @apply bg-white rounded-lg shadow-sm border border-gray-200 p-6;
+}
+
+.filter-grid {
+  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4;
+}
+
+.filter-item {
+  @apply flex flex-col;
+}
+
+.filter-label {
+  @apply block text-sm font-medium text-gray-700 mb-2;
+}
+
+.filter-input,
+.filter-select {
+  @apply w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200;
+}
+
+.filter-input:focus,
+.filter-select:focus {
+  @apply ring-2 ring-blue-500 border-blue-500;
+}
+
+/* Estilos para la tabla de empleos */
+.empleos-table {
+  @apply bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden;
+}
+
+.table-header {
+  @apply bg-gray-50 border-b border-gray-200;
+}
+
+.table-header-cell {
+  @apply px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider;
+}
+
+.table-row {
+  @apply border-b border-gray-200 hover:bg-gray-50 transition-colors duration-150;
+}
+
+.table-cell {
+  @apply px-6 py-4 whitespace-nowrap;
+}
+
+/* Estilos para badges y estados */
+.badge {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+}
+
+.badge-active {
+  @apply bg-green-100 text-green-800;
+}
+
+.badge-inactive {
+  @apply bg-red-100 text-red-800;
+}
+
+.badge-expired {
+  @apply bg-red-100 text-red-800;
+}
+
+.badge-paused {
+  @apply bg-yellow-100 text-yellow-800;
+}
+
+.badge-closed {
+  @apply bg-gray-100 text-gray-800;
+}
+
+.badge-urgent {
+  @apply bg-red-100 text-red-800;
+}
+
+.badge-normal {
+  @apply bg-blue-100 text-blue-800;
+}
+
+.badge-low {
+  @apply bg-gray-100 text-gray-800;
+}
+
+.badge-category {
+  @apply bg-blue-100 text-blue-800;
+}
+
+/* Estilos para botones de acción */
+.action-button {
+  @apply p-2 rounded-md transition-colors duration-200 hover:bg-opacity-80;
+}
+
+.action-button-view {
+  @apply text-blue-600 hover:bg-blue-100;
+}
+
+.action-button-edit {
+  @apply text-green-600 hover:bg-green-100;
+}
+
+.action-button-delete {
+  @apply text-red-600 hover:bg-red-100;
+}
+
+/* Estilos para el modal */
+.modal-overlay {
+  @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4;
+}
+
+.modal-container {
+  @apply bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden;
+}
+
+.modal-header {
+  @apply flex justify-between items-center p-6 border-b border-gray-200 bg-gray-50;
+}
+
+.modal-title {
+  @apply text-xl font-semibold text-gray-900;
+}
+
+.modal-close {
+  @apply text-gray-400 hover:text-gray-600 transition-colors duration-200;
+}
+
+.modal-body {
+  @apply p-6 overflow-y-auto max-h-[calc(90vh-140px)];
+}
+
+.modal-footer {
+  @apply flex justify-end gap-4 px-6 py-4 border-t border-gray-200 bg-gray-50;
+}
+
+/* Estilos para formularios */
+.form-section {
+  @apply mb-8;
+}
+
+.form-section-title {
+  @apply text-lg font-medium text-gray-900 mb-4 pb-2 border-b border-gray-200;
+}
+
+.form-grid {
+  @apply grid grid-cols-1 md:grid-cols-2 gap-4;
+}
+
+.form-grid-full {
+  @apply md:col-span-2;
+}
+
+.form-group {
+  @apply flex flex-col;
+}
+
+.form-label {
+  @apply block text-sm font-medium text-gray-700 mb-2;
+}
+
+.form-label-required::after {
+  content: ' *';
+  @apply text-red-500;
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+  @apply w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200;
+}
+
+.form-input:read-only,
+.form-select:disabled,
+.form-textarea:read-only {
+  @apply bg-gray-100 text-gray-600 cursor-not-allowed;
+}
+
+
+
+.form-checkbox {
+  @apply h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded;
+}
+
+.form-checkbox-label {
+  @apply ml-2 text-sm text-gray-700 cursor-pointer;
+}
+
+/* Estilos para arrays dinámicos */
+.dynamic-array-item {
+  @apply flex gap-2 mb-2 items-center;
+}
+
+.dynamic-array-input {
+  @apply flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500;
+}
+
+.dynamic-array-remove {
+  @apply px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors duration-200;
+}
+
+.dynamic-array-add {
+  @apply px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors duration-200 flex items-center gap-2;
+}
+
+/* Estilos para paginación */
+.pagination-container {
+  @apply flex items-center justify-between px-6 py-3 border-t border-gray-200 bg-gray-50;
+}
+
+.pagination-info {
+  @apply text-sm text-gray-700;
+}
+
+.pagination-buttons {
+  @apply flex gap-2;
+}
+
+.pagination-button {
+  @apply px-3 py-1 border border-gray-300 rounded hover:bg-gray-100 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+.pagination-button-active {
+  @apply bg-blue-500 text-white border-blue-500 hover:bg-blue-600;
+}
+
+/* Estilos para estados vacíos */
+.empty-state {
+  @apply flex flex-col items-center justify-center py-12 px-6 text-center;
+}
+
+.empty-state-icon {
+  @apply text-4xl text-gray-400 mb-4;
+}
+
+.empty-state-title {
+  @apply text-lg font-medium text-gray-900 mb-2;
+}
+
+.empty-state-description {
+  @apply text-gray-600 max-w-md;
+}
+
+/* Estilos para loading */
+.loading-container {
+  @apply flex flex-col items-center justify-center py-12;
+}
+
+.loading-spinner {
+  @apply text-3xl text-blue-500 mb-4 animate-spin;
+}
+
+.loading-text {
+  @apply text-gray-600;
+}
+
+/* Estilos para alertas de error */
+.error-alert {
+  @apply bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md flex items-center gap-2;
+}
+
+.error-icon {
+  @apply text-red-500;
+}
+
+/* Estilos para información de salario */
+.salary-info {
+  @apply text-sm text-gray-600 font-medium;
+}
+
+.salary-negotiable {
+  @apply text-xs text-blue-600 font-normal;
+}
+
+/* Estilos para modalidades de trabajo */
+.work-modality-grid {
+  @apply grid grid-cols-1 sm:grid-cols-3 gap-4;
+}
+
+.work-modality-item {
+  @apply flex items-center p-3 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors duration-200;
+}
+
+.work-modality-checkbox {
+  @apply h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded;
+}
+
+.work-modality-label {
+  @apply ml-3 text-sm font-medium text-gray-700 capitalize;
+}
+
+/* Estilos para información de empresa */
+.company-info {
+  @apply flex flex-col;
+}
+
+.company-name {
+  @apply font-medium text-gray-900;
+}
+
+.company-details {
+  @apply text-sm text-gray-600;
+}
+
+/* Estilos para contadores */
+.counter-container {
+  @apply text-center;
+}
+
+.counter-value {
+  @apply text-lg font-semibold text-gray-900;
+}
+
+.counter-label {
+  @apply text-xs text-gray-600;
+}
+
+/* Estilos responsive */
+@media (max-width: 768px) {
+  .modal-container {
+    @apply mx-4 max-w-none;
+  }
+  
+  .filter-grid {
+    @apply grid-cols-1;
+  }
+  
+  .form-grid {
+    @apply grid-cols-1;
+  }
+  
+  .stat-card {
+    @apply p-4;
+  }
+  
+  .table-cell {
+    @apply px-3 py-3;
+  }
+  
+  .modal-body {
+    @apply p-4;
+  }
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.slide-down {
+  animation: slideDown 0.2s ease-out;
+}
+
+/* Estilos para hover effects */
+.hover-lift {
+  @apply transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg;
+}
+
+.hover-scale {
+  @apply transition-transform duration-200 hover:scale-105;
+}
+
+/* Estilos para tooltips (si se implementan) */
+.tooltip {
+  @apply absolute z-10 px-2 py-1 text-sm text-white bg-gray-900 rounded shadow-lg opacity-0 pointer-events-none transition-opacity duration-200;
+}
+
+.tooltip-visible {
+  @apply opacity-100;
+}
+
+/* Estilos para highlights de búsqueda */
+.search-highlight {
+  @apply bg-yellow-200 text-yellow-900 px-1 rounded;
+}
+
+/* Estilos para métricas del dashboard */
+.metric-card {
+  @apply bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-4;
+}
+
+.metric-value {
+  @apply text-2xl font-bold text-blue-900;
+}
+
+.metric-label {
+  @apply text-sm text-blue-700;
+}
+
+.metric-trend {
+  @apply text-xs text-blue-600 flex items-center gap-1 mt-1;
+}
+
+/* Estilos para indicadores de urgencia */
+.urgency-indicator {
+  @apply w-3 h-3 rounded-full inline-block mr-2;
+}
+
+.urgency-urgent {
+  @apply bg-red-500 animate-pulse;
+}
+
+.urgency-normal {
+  @apply bg-blue-500;
+}
+
+.urgency-low {
+  @apply bg-gray-400;
+}
+
+/* Estilos para tags de keywords */
+.keyword-tag {
+  @apply inline-block bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-full mr-1 mb-1;
+}
+
+/* Utilidades adicionales */
+.text-truncate {
+  @apply truncate;
+}
+
+.text-wrap {
+  @apply break-words;
+}
+
+.border-dashed {
+  border-style: dashed;
+}
+
+.bg-pattern {
+  background-image: radial-gradient(circle, #e5e7eb 1px, transparent 1px);
+  background-size: 20px 20px;
+}

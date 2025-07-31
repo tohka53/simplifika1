@@ -1,0 +1,413 @@
+<!-- =============================================
+     TEMPLATE - buscar-empleos.component.html
+     ============================================= -->
+
+<div class="min-h-screen bg-gray-50 py-6">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900">Buscar Empleos</h1>
+      <p class="mt-2 text-gray-600">Encuentra tu próxima oportunidad laboral</p>
+    </div>
+
+    <!-- Filtros -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+      <h2 class="text-xl font-semibold text-gray-900 mb-4">
+        <i class="fas fa-filter mr-2"></i>Filtros de Búsqueda
+      </h2>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+        <!-- Búsqueda por palabra clave -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Palabra clave</label>
+          <input type="text" 
+                 [(ngModel)]="filtros.busqueda"
+                 placeholder="Desarrollador, ventas..."
+                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+
+        <!-- Categoría -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
+          <select [(ngModel)]="filtros.categoria" 
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="">Todas las categorías</option>
+            <option *ngFor="let cat of categorias" [value]="cat.valor">{{ cat.nombre }}</option>
+          </select>
+        </div>
+
+        <!-- Modalidad -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Modalidad</label>
+          <select [(ngModel)]="filtros.modalidad"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="">Todas las modalidades</option>
+            <option *ngFor="let mod of modalidades" [value]="mod.valor">{{ mod.nombre }}</option>
+          </select>
+        </div>
+
+        <!-- Experiencia -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Experiencia</label>
+          <select [(ngModel)]="filtros.experiencia"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="">Cualquier experiencia</option>
+            <option *ngFor="let exp of experiencias" [value]="exp.valor">{{ exp.nombre }}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="flex justify-between items-center">
+        <div class="flex space-x-2">
+          <button (click)="aplicarFiltros()" 
+                  class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <i class="fas fa-search mr-2"></i>Buscar
+          </button>
+          <button (click)="limpiarFiltros()"
+                  class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <i class="fas fa-broom mr-2"></i>Limpiar
+          </button>
+        </div>
+        
+        <div class="text-sm text-gray-600">
+          {{ total }} empleos encontrados
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading estado -->
+    <div *ngIf="cargando" class="text-center py-12">
+      <i class="fas fa-spinner fa-spin text-4xl text-blue-500 mb-4"></i>
+      <p class="text-gray-600">Cargando empleos...</p>
+    </div>
+
+    <!-- Lista de empleos -->
+    <div *ngIf="!cargando" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+      <div *ngFor="let empleo of empleos" 
+           class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden">
+        
+        <!-- Header de la tarjeta -->
+        <div class="p-6">
+          <div class="flex items-start justify-between mb-3">
+            <h3 class="text-lg font-semibold text-gray-900 line-clamp-2 flex-1">
+              {{ empleo.nombre }}
+            </h3>
+            <div class="ml-3 flex flex-col items-end space-y-1">
+              <span *ngIf="empleo.dias_restantes <= 7" 
+                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                <i class="fas fa-clock mr-1"></i>
+                {{ empleo.dias_restantes }} días
+              </span>
+              <span *ngIf="empleo.urgencia === 'urgente'" 
+                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                <i class="fas fa-exclamation mr-1"></i>
+                Urgente
+              </span>
+            </div>
+          </div>
+
+          <p class="text-sm text-gray-600 mb-2">
+            <i class="fas fa-building mr-1"></i>
+            {{ empleo.empresa_nombre }}
+          </p>
+
+          <p class="text-sm text-gray-600 mb-4">
+            <i class="fas fa-map-marker-alt mr-1"></i>
+            {{ obtenerModalidades(empleo.lugar_trabajo) }}
+          </p>
+
+          <!-- Tags -->
+          <div class="flex flex-wrap gap-2 mb-4">
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+              {{ empleo.categoria }}
+            </span>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+              {{ empleo.jornada_laboral }}
+            </span>
+            <span *ngIf="empleo.experiencia_laboral" 
+                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+              {{ empleo.experiencia_laboral }}
+            </span>
+          </div>
+
+          <!-- Salario -->
+          <div class="mb-4">
+            <p class="text-sm font-medium text-gray-900">
+              <i class="fas fa-money-bill-wave mr-1"></i>
+              {{ formatearSalario(empleo.salario) }}
+            </p>
+          </div>
+
+          <!-- Fecha de publicación -->
+          <p class="text-xs text-gray-500 mb-4">
+            Publicado: {{ empleo.fecha_creacion | date:'dd/MM/yyyy' }}
+          </p>
+        </div>
+
+        <!-- Footer de la tarjeta -->
+        <div class="px-6 py-4 bg-gray-50 border-t">
+          <div class="flex justify-between items-center">
+            <button (click)="verDetalle(empleo)"
+                    class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+              <i class="fas fa-eye mr-1"></i>Ver detalles
+            </button>
+            <button (click)="abrirModalAplicacion(empleo)"
+                    class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <i class="fas fa-paper-plane mr-1"></i>Aplicar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sin resultados -->
+    <div *ngIf="!cargando && empleos.length === 0" class="text-center py-12">
+      <i class="fas fa-search text-6xl text-gray-300 mb-4"></i>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">No se encontraron empleos</h3>
+      <p class="text-gray-600">Intenta ajustar los filtros de búsqueda</p>
+    </div>
+
+    <!-- Paginación -->
+    <div *ngIf="!cargando && empleos.length > 0 && getTotalPaginas() > 1" class="mt-8 flex justify-center">
+      <nav class="flex items-center space-x-2">
+        <button *ngFor="let pagina of getPaginasArray()"
+                (click)="cambiarPagina(pagina)"
+                [class.bg-blue-600]="paginaActual === pagina"
+                [class.text-white]="paginaActual === pagina"
+                [class.bg-white]="paginaActual !== pagina"
+                [class.text-gray-700]="paginaActual !== pagina"
+                class="px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          {{ pagina }}
+        </button>
+      </nav>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para ver detalle del empleo -->
+<div *ngIf="mostrarDetalleEmpleo" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+  <div class="relative top-10 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white mb-10">
+    <!-- Header del modal -->
+    <div class="flex items-center justify-between pb-4 border-b">
+      <h3 class="text-xl font-semibold text-gray-900">
+        Detalle del Empleo
+      </h3>
+      <button (click)="cerrarDetalleEmpleo()" class="text-gray-400 hover:text-gray-600">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <!-- Contenido del modal -->
+    <div class="mt-4" *ngIf="empleoSeleccionado">
+      <div class="space-y-4">
+        <div>
+          <h4 class="text-lg font-semibold text-gray-900">{{ empleoSeleccionado.nombre }}</h4>
+          <p class="text-gray-600">{{ empleoSeleccionado.empresa_nombre }}</p>
+        </div>
+
+        <div *ngIf="empleoSeleccionado.descripcion?.descripcion">
+          <h5 class="font-medium text-gray-900 mb-2">Descripción</h5>
+          <p class="text-gray-700">{{ empleoSeleccionado.descripcion.descripcion }}</p>
+        </div>
+
+        <div *ngIf="empleoSeleccionado.descripcion?.requisitos?.length">
+          <h5 class="font-medium text-gray-900 mb-2">Requisitos</h5>
+          <ul class="list-disc list-inside text-gray-700 space-y-1">
+            <li *ngFor="let requisito of empleoSeleccionado.descripcion.requisitos">{{ requisito }}</li>
+          </ul>
+        </div>
+
+        <div *ngIf="empleoSeleccionado.descripcion?.beneficios?.length">
+          <h5 class="font-medium text-gray-900 mb-2">Beneficios</h5>
+          <ul class="list-disc list-inside text-gray-700 space-y-1">
+            <li *ngFor="let beneficio of empleoSeleccionado.descripcion.beneficios">{{ beneficio }}</li>
+          </ul>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <h5 class="font-medium text-gray-900 mb-1">Jornada Laboral</h5>
+            <p class="text-gray-700">{{ empleoSeleccionado.jornada_laboral }}</p>
+          </div>
+          <div>
+            <h5 class="font-medium text-gray-900 mb-1">Vacantes</h5>
+            <p class="text-gray-700">{{ empleoSeleccionado.numero_vacantes || 1 }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer del modal -->
+      <div class="mt-6 pt-4 border-t flex justify-end space-x-3">
+        <button (click)="cerrarDetalleEmpleo()"
+                class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+          Cerrar
+        </button>
+        <button (click)="abrirModalAplicacion(empleoSeleccionado); cerrarDetalleEmpleo()"
+                class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+          <i class="fas fa-paper-plane mr-2"></i>Aplicar a este empleo
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para aplicar a empleo -->
+<div *ngIf="mostrarModalAplicacion" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+  <div class="relative top-10 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white mb-10">
+    <!-- Header del modal -->
+    <div class="flex items-center justify-between pb-4 border-b">
+      <h3 class="text-lg font-medium text-gray-900">
+        Aplicar al empleo
+      </h3>
+      <button (click)="cerrarModalAplicacion()" class="text-gray-400 hover:text-gray-600">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <!-- Contenido del modal -->
+    <div class="mt-4">
+      <!-- Información del empleo -->
+      <div class="bg-gray-50 p-4 rounded-lg mb-6">
+        <h4 class="font-semibold text-gray-900">{{ empleoSeleccionado?.nombre }}</h4>
+        <p class="text-sm text-gray-600">{{ empleoSeleccionado?.empresa_nombre }}</p>
+        <div class="flex flex-wrap gap-2 mt-2">
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+            {{ empleoSeleccionado?.categoria }}
+          </span>
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+            {{ empleoSeleccionado?.jornada_laboral }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Formulario de aplicación -->
+      <form (ngSubmit)="enviarAplicacion()" #aplicacionForm="ngForm">
+        
+        <!-- Selección de CV -->
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Selecciona tu CV <span class="text-red-500">*</span>
+          </label>
+          
+          <div *ngIf="misCVs.length === 0" class="text-center py-8 text-gray-500">
+            <i class="fas fa-file-alt text-4xl mb-4"></i>
+            <p class="mb-2">No tienes CVs creados</p>
+            <a routerLink="/cv/crear" class="text-blue-600 hover:text-blue-800 font-medium">
+              Crear mi primer CV
+            </a>
+          </div>
+
+          <div *ngIf="misCVs.length > 0" class="grid grid-cols-1 gap-3">
+            <div *ngFor="let cv of misCVs" 
+                 class="border-2 rounded-lg p-4 cursor-pointer transition-all duration-200"
+                 [class.border-blue-500]="aplicacion.cv_id === cv.id"
+                 [class.bg-blue-50]="aplicacion.cv_id === cv.id"
+                 [class.border-gray-300]="aplicacion.cv_id !== cv.id"
+                 (click)="onCVSeleccionado(cv.id)">
+              
+              <div class="flex items-start justify-between">
+                <div class="flex items-center flex-1">
+                  <input type="radio" 
+                         [checked]="aplicacion.cv_id === cv.id"
+                         class="text-blue-600 border-gray-300 focus:ring-blue-500">
+                  <div class="ml-3 flex-1">
+                    <label class="font-medium text-gray-900 cursor-pointer">{{ cv.nombre }}</label>
+                    <div class="flex items-center mt-1 text-xs text-gray-500">
+                      <i class="fas fa-calendar-alt mr-1"></i>
+                      Actualizado: {{ cv.fecha_actualizacion | date:'dd/MM/yyyy' }}
+                      <span *ngIf="cv.activo" class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        Activo
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Carta de presentación -->
+        <div class="mb-6">
+          <label for="carta_presentacion" class="block text-sm font-medium text-gray-700 mb-2">
+            Carta de Presentación <span class="text-red-500">*</span>
+          </label>
+          <textarea id="carta_presentacion"
+                    [(ngModel)]="aplicacion.carta_presentacion"
+                    name="carta_presentacion"
+                    required
+                    rows="6"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Describe por qué eres el candidato ideal para este puesto..."></textarea>
+          <p class="text-xs text-gray-500 mt-1">
+            Personaliza tu carta para este empleo específico. Menciona tus habilidades relevantes y motivación.
+          </p>
+        </div>
+
+        <!-- Salario esperado -->
+        <div class="mb-6">
+          <label for="salario_esperado" class="block text-sm font-medium text-gray-700 mb-2">
+            Salario Esperado (GTQ)
+          </label>
+          <input type="number"
+                 id="salario_esperado"
+                 [(ngModel)]="aplicacion.salario_esperado"
+                 name="salario_esperado"
+                 min="0"
+                 class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                 placeholder="15000">
+          <p class="text-xs text-gray-500 mt-1">
+            Opcional. Si no especificas, se considerará negociable.
+          </p>
+        </div>
+
+        <!-- Disponibilidad de inicio -->
+        <div class="mb-6">
+          <label for="disponibilidad_inicio" class="block text-sm font-medium text-gray-700 mb-2">
+            Disponibilidad para iniciar
+          </label>
+          <input type="date"
+                 id="disponibilidad_inicio"
+                 [(ngModel)]="aplicacion.disponibilidad_inicio"
+                 name="disponibilidad_inicio"
+                    
+                 class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+        </div>
+
+        <!-- Notas adicionales -->
+        <div class="mb-6">
+          <label for="notas_candidato" class="block text-sm font-medium text-gray-700 mb-2">
+            Notas Adicionales
+          </label>
+          <textarea id="notas_candidato"
+                    [(ngModel)]="aplicacion.notas_candidato"
+                    name="notas_candidato"
+                    rows="3"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Información adicional que consideres relevante..."></textarea>
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="flex items-center justify-end space-x-4 pt-4 border-t">
+          <button type="button"
+                  (click)="cerrarModalAplicacion()"
+                  class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+            Cancelar
+          </button>
+          <button type="submit"
+                  [disabled]="!aplicacionForm.valid || !aplicacion.cv_id || cargando"
+                  class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed">
+            <span *ngIf="cargando">
+              <i class="fas fa-spinner fa-spin mr-2"></i>
+              Enviando...
+            </span>
+            <span *ngIf="!cargando">
+              <i class="fas fa-paper-plane mr-2"></i>
+              Enviar Aplicación
+            </span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

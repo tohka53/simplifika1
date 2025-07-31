@@ -15,7 +15,11 @@ import { CVFormComponent } from './cv-form/cv-form/cv-form.component';
 import { CVViewComponent } from './cv-view/cv-view/cv-view.component';
 import { EmpresasComponent } from './empresas/empresas/empresas.component';
 import { GestionarEmpresasComponent } from './gestionar-empresas/gestionar-empresas/gestionar-empresas.component';
-
+import { GestionarEmpleosComponent } from './gestionar-empleos/gestionar-empleos/gestionar-empleos.component';
+import { BuscarEmpleosComponent } from './buscar-empleos/buscar-empleos/buscar-empleos.component';
+import { MisAplicacionesComponent } from './mis-aplicaciones/mis-aplicaciones/mis-aplicaciones.component';
+import { RevisarCandidatosComponent } from './revisar-candidatos/revisar-candidatos/revisar-candidatos.component';
+import { PostulacionesService } from './services/postulaciones.service';
 @NgModule({
   declarations: [
     AppComponent,
@@ -29,7 +33,11 @@ import { GestionarEmpresasComponent } from './gestionar-empresas/gestionar-empre
     CVFormComponent,
     CVViewComponent,
     EmpresasComponent,
-    GestionarEmpresasComponent
+    GestionarEmpresasComponent,
+    GestionarEmpleosComponent,
+    BuscarEmpleosComponent,
+    MisAplicacionesComponent,
+    RevisarCandidatosComponent
   ],
   imports: [
     BrowserModule,

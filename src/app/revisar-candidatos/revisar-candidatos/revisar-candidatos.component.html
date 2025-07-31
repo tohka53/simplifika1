@@ -1,0 +1,557 @@
+<div class="min-h-screen bg-gray-50 py-6">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900">Revisar Candidatos</h1>
+      <p class="mt-2 text-gray-600">Gestiona las aplicaciones recibidas</p>
+    </div>
+
+    <!-- Estadísticas rápidas -->
+    <div class="grid grid-cols-1 md:grid-cols-6 gap-4 mb-6">
+      <div class="bg-white rounded-lg shadow p-4">
+        <div class="text-2xl font-bold text-blue-600">{{ aplicaciones.length }}</div>
+        <div class="text-sm text-gray-600">Total</div>
+      </div>
+      <div class="bg-white rounded-lg shadow p-4">
+        <div class="text-2xl font-bold text-yellow-600">{{ contarPorEstado('pendiente') }}</div>
+        <div class="text-sm text-gray-600">Pendientes</div>
+      </div>
+      <div class="bg-white rounded-lg shadow p-4">
+        <div class="text-2xl font-bold text-blue-600">{{ contarPorEstado('revisado') }}</div>
+        <div class="text-sm text-gray-600">Revisados</div>
+      </div>
+      <div class="bg-white rounded-lg shadow p-4">
+        <div class="text-2xl font-bold text-green-600">{{ contarPorEstado('preseleccionado') }}</div>
+        <div class="text-sm text-gray-600">Preseleccionados</div>
+      </div>
+      <div class="bg-white rounded-lg shadow p-4">
+        <div class="text-2xl font-bold text-purple-600">{{ contarPorEstado('entrevista') }}</div>
+        <div class="text-sm text-gray-600">En Entrevista</div>
+      </div>
+      <div class="bg-white rounded-lg shadow p-4">
+        <div class="text-2xl font-bold text-green-700">{{ contarPorEstado('contratado') }}</div>
+        <div class="text-sm text-gray-600">Contratados</div>
+      </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+      <h2 class="text-lg font-semibold text-gray-900 mb-4">Filtros</h2>
+      
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
+          <select [(ngModel)]="filtros.status" 
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="">Todos los estados</option>
+            <option *ngFor="let estado of estados" [value]="estado.valor">{{ estado.nombre }}</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Desde</label>
+          <input type="date" 
+                 [(ngModel)]="filtros.fecha_desde"
+                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Hasta</label>
+          <input type="date" 
+                 [(ngModel)]="filtros.fecha_hasta"
+                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+
+        <div class="flex items-end">
+          <div class="space-x-2">
+            <button (click)="aplicarFiltros()" 
+                    class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+              <i class="fas fa-search mr-2"></i>Buscar
+            </button>
+            <button (click)="limpiarFiltros()"
+                    class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50">
+              <i class="fas fa-broom mr-2"></i>Limpiar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading estado -->
+    <div *ngIf="cargando" class="text-center py-12">
+      <i class="fas fa-spinner fa-spin text-4xl text-blue-500 mb-4"></i>
+      <p class="text-gray-600">Cargando aplicaciones...</p>
+    </div>
+
+    <!-- Lista de candidatos -->
+    <div *ngIf="!cargando" class="space-y-4">
+      <div *ngFor="let aplicacion of aplicaciones" 
+           class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
+        
+        <div class="p-6">
+          <div class="flex items-start justify-between">
+            <div class="flex items-start space-x-4 flex-1">
+              <!-- Avatar del candidato -->
+              <div class="flex-shrink-0">
+                <img *ngIf="aplicacion.candidato_foto" 
+                     [src]="aplicacion.candidato_foto" 
+                     alt="Foto del candidato"
+                     class="w-12 h-12 rounded-full object-cover">
+                <div *ngIf="!aplicacion.candidato_foto" 
+                     class="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center">
+                  <i class="fas fa-user text-gray-600"></i>
+                </div>
+              </div>
+
+              <!-- Información del candidato -->
+              <div class="flex-1 min-w-0">
+                <h3 class="text-lg font-semibold text-gray-900">
+                  {{ aplicacion.candidato_nombre }}
+                </h3>
+                <p class="text-sm text-gray-600 mb-1">
+                  Aplicó para: <span class="font-medium">{{ aplicacion.empleo_nombre }}</span>
+                </p>
+                <p class="text-sm text-gray-500 mb-2">
+                  <i class="fas fa-envelope mr-1"></i>{{ aplicacion.candidato_email }}
+                  <span *ngIf="aplicacion.candidato_telefono" class="ml-4">
+                    <i class="fas fa-phone mr-1"></i>{{ aplicacion.candidato_telefono }}
+                  </span>
+                </p>
+
+                <div class="flex items-center space-x-4 text-sm text-gray-500 mb-3">
+                  <span>
+                    <i class="fas fa-calendar mr-1"></i>
+                    {{ aplicacion.fecha_aplicacion | date:'dd/MM/yyyy HH:mm' }}
+                  </span>
+                  <span>
+                    <i class="fas fa-clock mr-1"></i>
+                    Hace {{ aplicacion.dias_desde_aplicacion }} días
+                  </span>
+                  <span *ngIf="aplicacion.cv_nombre">
+                    <i class="fas fa-file-alt mr-1"></i>
+                    CV: {{ aplicacion.cv_nombre }}
+                  </span>
+                </div>
+
+                <div class="flex items-center space-x-3">
+                  <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
+                        [ngClass]="obtenerColorEstado(aplicacion.status)">
+                    {{ aplicacion.status | titlecase }}
+                  </span>
+                  
+                  <span *ngIf="aplicacion.puntuacion_rrhh" 
+                        class="inline-flex items-center text-sm text-gray-600">
+                    <i class="fas fa-star text-yellow-400 mr-1"></i>
+                    {{ aplicacion.puntuacion_rrhh }}/10
+                  </span>
+
+                  <span *ngIf="aplicacion.salario_esperado"
+                        class="inline-flex items-center text-sm text-gray-600">
+                    <i class="fas fa-money-bill-wave mr-1"></i>
+                    Q{{ aplicacion.salario_esperado | number:'1.0-0' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Acciones -->
+            <div class="flex items-center space-x-2 ml-4">
+              <button (click)="verDetalleCandidato(aplicacion)"
+                      class="px-3 py-2 text-blue-600 hover:text-blue-800 text-sm font-medium">
+                <i class="fas fa-eye mr-1"></i>Ver CV
+              </button>
+              
+              <button (click)="abrirModalEstado(aplicacion)"
+                      class="px-3 py-2 bg-green-600 text-white text-sm rounded-md hover:bg-green-700">
+                <i class="fas fa-edit mr-1"></i>Actualizar
+              </button>
+            </div>
+          </div>
+
+          <!-- Carta de presentación (extracto) -->
+          <div *ngIf="aplicacion.carta_presentacion" class="mt-4 p-3 bg-gray-50 rounded-lg">
+            <h5 class="text-sm font-medium text-gray-900 mb-1">Carta de presentación:</h5>
+            <p class="text-sm text-gray-700 line-clamp-3">{{ aplicacion.carta_presentacion }}</p>
+          </div>
+
+          <!-- Notas de RRHH -->
+          <div *ngIf="aplicacion.notas_rrhh" class="mt-4 p-3 bg-blue-50 rounded-lg">
+            <h5 class="text-sm font-medium text-gray-900 mb-1">Notas de RRHH:</h5>
+            <p class="text-sm text-gray-700">{{ aplicacion.notas_rrhh }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sin candidatos -->
+    <div *ngIf="!cargando && aplicaciones.length === 0" class="text-center py-12">
+      <i class="fas fa-users text-6xl text-gray-300 mb-4"></i>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">No hay aplicaciones</h3>
+      <p class="text-gray-600">No se han recibido aplicaciones con los filtros seleccionados</p>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para actualizar estado de aplicación -->
+<div *ngIf="mostrarModalEstado && aplicacionSeleccionada" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+  <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-1/2 shadow-lg rounded-md bg-white">
+    <!-- Header del modal -->
+    <div class="flex items-center justify-between pb-4 border-b">
+      <h3 class="text-lg font-semibold text-gray-900">
+        Actualizar Estado de Aplicación
+      </h3>
+      <button (click)="cerrarModalEstado()" class="text-gray-400 hover:text-gray-600">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <!-- Contenido del modal -->
+    <div class="mt-4">
+      <!-- Información del candidato -->
+      <div class="bg-gray-50 p-4 rounded-lg mb-6">
+        <h4 class="font-semibold text-gray-900">{{ aplicacionSeleccionada.candidato_nombre }}</h4>
+        <p class="text-sm text-gray-600">{{ aplicacionSeleccionada.empleo_nombre }}</p>
+        <p class="text-sm text-gray-500">Aplicó el {{ aplicacionSeleccionada.fecha_aplicacion | date:'dd/MM/yyyy' }}</p>
+      </div>
+
+      <!-- Formulario de actualización -->
+      <form (ngSubmit)="actualizarEstado()" #estadoForm="ngForm">
+        
+        <!-- Nuevo estado -->
+        <div class="mb-4">
+          <label for="status" class="block text-sm font-medium text-gray-700 mb-2">
+            Nuevo Estado <span class="text-red-500">*</span>
+          </label>
+          <select id="status"
+                  [(ngModel)]="actualizacionEstado.status"
+                  name="status"
+                  required
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option *ngFor="let estado of estados" [value]="estado.valor">{{ estado.nombre }}</option>
+          </select>
+        </div>
+
+        <!-- Puntuación RRHH -->
+        <div class="mb-4">
+          <label for="puntuacion_rrhh" class="block text-sm font-medium text-gray-700 mb-2">
+            Puntuación (1-10)
+          </label>
+          <input type="number"
+                 id="puntuacion_rrhh"
+                 [(ngModel)]="actualizacionEstado.puntuacion_rrhh"
+                 name="puntuacion_rrhh"
+                 min="1"
+                 max="10"
+                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                 placeholder="Puntuación del 1 al 10">
+        </div>
+
+        <!-- Notas de RRHH -->
+        <div class="mb-4">
+          <label for="notas_rrhh" class="block text-sm font-medium text-gray-700 mb-2">
+            Notas de RRHH
+          </label>
+          <textarea id="notas_rrhh"
+                    [(ngModel)]="actualizacionEstado.notas_rrhh"
+                    name="notas_rrhh"
+                    rows="4"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Comentarios sobre el candidato..."></textarea>
+        </div>
+
+        <!-- Comentario del cambio -->
+        <div class="mb-6">
+          <label for="comentario" class="block text-sm font-medium text-gray-700 mb-2">
+            Comentario del Cambio
+          </label>
+          <textarea id="comentario"
+                    [(ngModel)]="actualizacionEstado.comentario"
+                    name="comentario"
+                    rows="3"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Razón del cambio de estado..."></textarea>
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="flex items-center justify-end space-x-4 pt-4 border-t">
+          <button type="button"
+                  (click)="cerrarModalEstado()"
+                  class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+            Cancelar
+          </button>
+          <button type="submit"
+                  [disabled]="!estadoForm.valid || cargando"
+                  class="px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">
+            <span *ngIf="cargando">
+              <i class="fas fa-spinner fa-spin mr-2"></i>
+              Actualizando...
+            </span>
+            <span *ngIf="!cargando">
+              <i class="fas fa-save mr-2"></i>
+              Actualizar Estado
+            </span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para ver CV completo del candidato -->
+<div *ngIf="mostrarDetalle && aplicacionSeleccionada" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+  <div class="relative top-4 mx-auto p-4 border w-11/12 max-w-6xl shadow-lg rounded-md bg-white mb-8">
+    
+    <!-- Header del modal -->
+    <div class="flex items-center justify-between pb-4 border-b bg-white sticky top-0 z-10">
+      <div class="flex items-center">
+        <img *ngIf="aplicacionSeleccionada.candidato_foto" 
+             [src]="aplicacionSeleccionada.candidato_foto" 
+             alt="Foto del candidato"
+             class="w-12 h-12 rounded-full object-cover mr-4">
+        <div *ngIf="!aplicacionSeleccionada.candidato_foto" 
+             class="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center mr-4">
+          <i class="fas fa-user text-gray-600"></i>
+        </div>
+        <div>
+          <h3 class="text-xl font-semibold text-gray-900">{{ aplicacionSeleccionada.candidato_nombre }}</h3>
+          <p class="text-sm text-gray-600">Aplicación para: {{ aplicacionSeleccionada.empleo_nombre }}</p>
+        </div>
+      </div>
+      
+      <div class="flex items-center space-x-3">
+        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
+              [ngClass]="obtenerColorEstado(aplicacionSeleccionada.status)">
+          {{ aplicacionSeleccionada.status | titlecase }}
+        </span>
+        
+        <button (click)="abrirModalEstado(aplicacionSeleccionada); cerrarDetalle()"
+                class="px-4 py-2 bg-green-600 text-white text-sm rounded-md hover:bg-green-700">
+          <i class="fas fa-edit mr-2"></i>Actualizar Estado
+        </button>
+        
+        <button (click)="cerrarDetalle()" 
+                class="text-gray-400 hover:text-gray-600 text-xl">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Contenido del CV -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+      
+      <!-- Columna izquierda - Información de la aplicación -->
+      <div class="lg:col-span-1 space-y-6">
+        
+        <!-- Datos de la aplicación -->
+        <div class="bg-gray-50 rounded-lg p-4">
+          <h4 class="text-lg font-semibold text-gray-900 mb-3">
+            <i class="fas fa-file-alt mr-2"></i>Datos de la Aplicación
+          </h4>
+          
+          <div class="space-y-3">
+            <div>
+              <label class="text-sm font-medium text-gray-700">Fecha de aplicación:</label>
+              <p class="text-sm text-gray-900">{{ aplicacionSeleccionada.fecha_aplicacion | date:'dd/MM/yyyy HH:mm' }}</p>
+            </div>
+            
+            <div *ngIf="aplicacionSeleccionada.salario_esperado">
+              <label class="text-sm font-medium text-gray-700">Salario esperado:</label>
+              <p class="text-sm text-gray-900">Q{{ aplicacionSeleccionada.salario_esperado | number:'1.0-0' }}</p>
+            </div>
+            
+            <div *ngIf="aplicacionSeleccionada.disponibilidad_inicio">
+              <label class="text-sm font-medium text-gray-700">Disponibilidad para iniciar:</label>
+              <p class="text-sm text-gray-900">{{ aplicacionSeleccionada.disponibilidad_inicio | date:'dd/MM/yyyy' }}</p>
+            </div>
+            
+            <div *ngIf="aplicacionSeleccionada.notas_candidato">
+              <label class="text-sm font-medium text-gray-700">Notas del candidato:</label>
+              <p class="text-sm text-gray-900 whitespace-pre-line">{{ aplicacionSeleccionada.notas_candidato }}</p>
+            </div>
+            
+            <div *ngIf="aplicacionSeleccionada.notas_rrhh">
+              <label class="text-sm font-medium text-gray-700">Notas de RRHH:</label>
+              <p class="text-sm text-gray-900 whitespace-pre-line">{{ aplicacionSeleccionada.notas_rrhh }}</p>
+            </div>
+            
+            <div *ngIf="aplicacionSeleccionada.puntuacion_rrhh">
+              <label class="text-sm font-medium text-gray-700">Puntuación RRHH:</label>
+              <div class="flex items-center">
+                <span class="text-lg font-bold text-blue-600 mr-2">{{ aplicacionSeleccionada.puntuacion_rrhh }}/10</span>
+                <div class="flex">
+                  <i *ngFor="let star of [1,2,3,4,5,6,7,8,9,10]" 
+                     class="fas fa-star text-sm"
+                     [class.text-yellow-400]="star <= aplicacionSeleccionada.puntuacion_rrhh"
+                     [class.text-gray-300]="star > aplicacionSeleccionada.puntuacion_rrhh"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Carta de presentación -->
+        <div *ngIf="aplicacionSeleccionada.carta_presentacion" class="bg-blue-50 rounded-lg p-4">
+          <h4 class="text-lg font-semibold text-gray-900 mb-3">
+            <i class="fas fa-envelope mr-2"></i>Carta de Presentación
+          </h4>
+          <p class="text-sm text-gray-800 whitespace-pre-line leading-relaxed">
+            {{ aplicacionSeleccionada.carta_presentacion }}
+          </p>
+        </div>
+
+        <!-- Información de contacto -->
+        <div class="bg-white border rounded-lg p-4">
+          <h4 class="text-lg font-semibold text-gray-900 mb-3">
+            <i class="fas fa-address-card mr-2"></i>Información de Contacto
+          </h4>
+          
+          <div class="space-y-2">
+            <div *ngIf="aplicacionSeleccionada.candidato_email">
+              <label class="text-sm font-medium text-gray-700">Email:</label>
+              <p class="text-sm text-gray-900">
+                <a [href]="'mailto:' + aplicacionSeleccionada.candidato_email" 
+                   class="text-blue-600 hover:text-blue-800">
+                  {{ aplicacionSeleccionada.candidato_email }}
+                </a>
+              </p>
+            </div>
+            
+            <div *ngIf="aplicacionSeleccionada.candidato_telefono">
+              <label class="text-sm font-medium text-gray-700">Teléfono:</label>
+              <p class="text-sm text-gray-900">
+                <a [href]="'tel:' + aplicacionSeleccionada.candidato_telefono" 
+                   class="text-blue-600 hover:text-blue-800">
+                  {{ aplicacionSeleccionada.candidato_telefono }}
+                </a>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Columna derecha - CV completo -->
+      <div class="lg:col-span-2 space-y-6">
+        
+        <!-- Experiencia laboral -->
+        <div *ngIf="aplicacionSeleccionada.cv_experiencia && aplicacionSeleccionada.cv_experiencia.length > 0" 
+             class="bg-white border rounded-lg p-6">
+          <h4 class="text-lg font-semibold text-gray-900 mb-4">
+            <i class="fas fa-briefcase mr-2"></i>Experiencia Laboral
+          </h4>
+          
+          <div class="space-y-4">
+            <div *ngFor="let exp of aplicacionSeleccionada.cv_experiencia; let i = index" 
+                 class="border-l-4 border-blue-500 pl-4 pb-4"
+                 [class.border-b]="i < aplicacionSeleccionada.cv_experiencia.length - 1">
+              
+              <div class="flex justify-between items-start mb-2">
+                <h5 class="font-semibold text-gray-900">{{ exp.puesto_ejercido }}</h5>
+                <span class="text-sm text-gray-500">
+                  {{ exp.anio_inicio }} - {{ exp.anio_finalizacion }}
+                </span>
+              </div>
+              
+              <p class="text-sm font-medium text-gray-700 mb-1">{{ exp.institucion }}</p>
+              <p *ngIf="exp.motivo_retiro" class="text-sm text-gray-600">
+                <strong>Motivo de retiro:</strong> {{ exp.motivo_retiro }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Educación -->
+        <div *ngIf="aplicacionSeleccionada.cv_educacion && aplicacionSeleccionada.cv_educacion.length > 0" 
+             class="bg-white border rounded-lg p-6">
+          <h4 class="text-lg font-semibold text-gray-900 mb-4">
+            <i class="fas fa-graduation-cap mr-2"></i>Educación
+          </h4>
+          
+          <div class="space-y-4">
+            <div *ngFor="let edu of aplicacionSeleccionada.cv_educacion; let i = index" 
+                 class="border-l-4 border-green-500 pl-4 pb-4"
+                 [class.border-b]="i < aplicacionSeleccionada.cv_educacion.length - 1">
+              
+              <div class="flex justify-between items-start mb-2">
+                <h5 class="font-semibold text-gray-900">{{ edu.titulo_obtenido }}</h5>
+                <span class="text-sm text-gray-500">
+                  {{ edu.anio_inicio }} - {{ edu.anio_finalizacion }}
+                </span>
+              </div>
+              
+              <p class="text-sm font-medium text-gray-700">{{ edu.institucion }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Idiomas -->
+        <div *ngIf="aplicacionSeleccionada.cv_idiomas && aplicacionSeleccionada.cv_idiomas.length > 0" 
+             class="bg-white border rounded-lg p-6">
+          <h4 class="text-lg font-semibold text-gray-900 mb-4">
+            <i class="fas fa-language mr-2"></i>Idiomas
+          </h4>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div *ngFor="let idioma of aplicacionSeleccionada.cv_idiomas" 
+                 class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div>
+                <p class="font-medium text-gray-900">{{ idioma.idioma }}</p>
+                <p class="text-sm text-gray-600">{{ idioma.nivel }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cursos y certificaciones -->
+        <div *ngIf="aplicacionSeleccionada.cv_cursos && aplicacionSeleccionada.cv_cursos.length > 0" 
+             class="bg-white border rounded-lg p-6">
+          <h4 class="text-lg font-semibold text-gray-900 mb-4">
+            <i class="fas fa-certificate mr-2"></i>Cursos y Certificaciones
+          </h4>
+          
+          <div class="space-y-3">
+            <div *ngFor="let curso of aplicacionSeleccionada.cv_cursos" 
+                 class="p-3 bg-gray-50 rounded-lg">
+              <h5 class="font-medium text-gray-900">{{ curso.nombre_reconocimiento }}</h5>
+              <p class="text-sm text-gray-600">{{ curso.institucion }} - {{ curso.anio_realizado }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Referencias -->
+        <div *ngIf="aplicacionSeleccionada.cv_referencias && aplicacionSeleccionada.cv_referencias.length > 0" 
+             class="bg-white border rounded-lg p-6">
+          <h4 class="text-lg font-semibold text-gray-900 mb-4">
+            <i class="fas fa-users mr-2"></i>Referencias
+          </h4>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div *ngFor="let ref of aplicacionSeleccionada.cv_referencias" 
+                 class="p-3 bg-gray-50 rounded-lg">
+              <h5 class="font-medium text-gray-900">{{ ref.nombre_apellido }}</h5>
+              <p class="text-sm text-gray-600">{{ ref.parentesco }}</p>
+              <p class="text-sm text-blue-600">{{ ref.numero_telefonico }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer con acciones adicionales -->
+    <div class="mt-6 pt-4 border-t bg-gray-50 rounded-b-md">
+      <div class="flex justify-between items-center">
+        <div class="text-sm text-gray-600">
+          <i class="fas fa-clock mr-1"></i>
+          Aplicación enviada hace {{ aplicacionSeleccionada.dias_desde_aplicacion }} días
+        </div>
+        
+        <div class="flex space-x-3">
+          <button (click)="abrirModalEstado(aplicacionSeleccionada); cerrarDetalle()"
+                  class="px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700">
+            <i class="fas fa-edit mr-2"></i>Cambiar Estado
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

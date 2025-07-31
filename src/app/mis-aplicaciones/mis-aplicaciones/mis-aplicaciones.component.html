@@ -1,0 +1,237 @@
+<div class="min-h-screen bg-gray-50 py-6">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900">Mis Aplicaciones</h1>
+      <p class="mt-2 text-gray-600">Seguimiento de tus postulaciones enviadas</p>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+      <div class="bg-white rounded-lg shadow p-4">
+        <div class="text-2xl font-bold text-blue-600">{{ aplicaciones.length }}</div>
+        <div class="text-sm text-gray-600">Total</div>
+      </div>
+      <div class="bg-white rounded-lg shadow p-4">
+        <div class="text-2xl font-bold text-yellow-600">{{ contarPorEstado('pendiente') }}</div>
+        <div class="text-sm text-gray-600">Pendientes</div>
+      </div>
+      <div class="bg-white rounded-lg shadow p-4">
+        <div class="text-2xl font-bold text-blue-600">{{ contarPorEstado('revisado') }}</div>
+        <div class="text-sm text-gray-600">Revisados</div>
+      </div>
+      <div class="bg-white rounded-lg shadow p-4">
+        <div class="text-2xl font-bold text-green-600">{{ contarPorEstado('preseleccionado') }}</div>
+        <div class="text-sm text-gray-600">Preseleccionados</div>
+      </div>
+      <div class="bg-white rounded-lg shadow p-4">
+        <div class="text-2xl font-bold text-purple-600">{{ contarPorEstado('entrevista') }}</div>
+        <div class="text-sm text-gray-600">En Entrevista</div>
+      </div>
+      <div class="bg-white rounded-lg shadow p-4">
+        <div class="text-2xl font-bold text-green-700">{{ contarPorEstado('contratado') }}</div>
+        <div class="text-sm text-gray-600">Contratados</div>
+      </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+      <h2 class="text-lg font-semibold text-gray-900 mb-4">Filtros</h2>
+      
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
+          <select [(ngModel)]="filtros.status" 
+                  (change)="aplicarFiltros()"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option *ngFor="let estado of estados" [value]="estado.valor">{{ estado.nombre }}</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Buscar empleo o empresa</label>
+          <input type="text" 
+                 [(ngModel)]="filtros.empleo"
+                 (input)="aplicarFiltros()"
+                 placeholder="Nombre del empleo o empresa..."
+                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Desde fecha</label>
+          <input type="date" 
+                 [(ngModel)]="filtros.fecha_desde"
+                 (change)="aplicarFiltros()"
+                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Hasta fecha</label>
+          <input type="date" 
+                 [(ngModel)]="filtros.fecha_hasta"
+                 (change)="aplicarFiltros()"
+                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+      </div>
+
+      <div class="flex justify-end">
+        <button (click)="limpiarFiltros()"
+                class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50">
+          <i class="fas fa-broom mr-2"></i>Limpiar filtros
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading estado -->
+    <div *ngIf="cargando" class="text-center py-12">
+      <i class="fas fa-spinner fa-spin text-4xl text-blue-500 mb-4"></i>
+      <p class="text-gray-600">Cargando aplicaciones...</p>
+    </div>
+
+    <!-- Lista de aplicaciones -->
+    <div *ngIf="!cargando" class="space-y-4">
+      <div *ngFor="let aplicacion of aplicacionesFiltradas" 
+           class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
+        
+        <div class="p-6">
+          <div class="flex items-start justify-between">
+            <div class="flex-1">
+              <h3 class="text-lg font-semibold text-gray-900 mb-2">
+                {{ aplicacion.empleo_nombre }}
+              </h3>
+              <p class="text-gray-600 mb-3">
+                <i class="fas fa-building mr-1"></i>
+                {{ aplicacion.empresa_nombre }}
+              </p>
+              
+              <div class="flex items-center space-x-4 text-sm text-gray-500 mb-3">
+                <span>
+                  <i class="fas fa-calendar mr-1"></i>
+                  Aplicado: {{ aplicacion.fecha_aplicacion | date:'dd/MM/yyyy' }}
+                </span>
+                <span *ngIf="aplicacion.dias_desde_aplicacion">
+                  <i class="fas fa-clock mr-1"></i>
+                  Hace {{ aplicacion.dias_desde_aplicacion }} días
+                </span>
+              </div>
+
+              <div class="flex items-center space-x-3">
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border"
+                      [ngClass]="obtenerColorEstado(aplicacion.status)">
+                  {{ getStatusDescription(aplicacion.status) }}
+                </span>
+                
+                <span *ngIf="aplicacion.puntuacion_rrhh" 
+                      class="inline-flex items-center text-sm text-gray-600">
+                  <i class="fas fa-star text-yellow-400 mr-1"></i>
+                  {{ aplicacion.puntuacion_rrhh }}/10
+                </span>
+              </div>
+            </div>
+
+            <div class="flex items-center space-x-2 ml-4">
+              <button (click)="verDetalle(aplicacion)"
+                      class="px-3 py-2 text-blue-600 hover:text-blue-800 text-sm font-medium">
+                <i class="fas fa-eye mr-1"></i>Ver detalle
+              </button>
+              
+              <button *ngIf="puedeRetirar(aplicacion)"
+                      (click)="retirarAplicacion(aplicacion.id)"
+                      class="px-3 py-2 text-red-600 hover:text-red-800 text-sm font-medium">
+                <i class="fas fa-trash mr-1"></i>Retirar
+              </button>
+            </div>
+          </div>
+
+          <!-- Notas adicionales -->
+          <div *ngIf="aplicacion.notas_rrhh" class="mt-4 p-3 bg-blue-50 rounded-lg">
+            <h5 class="text-sm font-medium text-gray-900 mb-1">Comentarios de RRHH:</h5>
+            <p class="text-sm text-gray-700">{{ aplicacion.notas_rrhh }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sin aplicaciones -->
+    <div *ngIf="!cargando && aplicacionesFiltradas.length === 0" class="text-center py-12">
+      <i class="fas fa-file-alt text-6xl text-gray-300 mb-4"></i>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">No hay aplicaciones</h3>
+      <p class="text-gray-600 mb-4">
+        <span *ngIf="aplicaciones.length === 0">Aún no has aplicado a ningún empleo</span>
+        <span *ngIf="aplicaciones.length > 0">No hay aplicaciones que coincidan con los filtros seleccionados</span>
+      </p>
+      <a *ngIf="aplicaciones.length === 0" 
+         routerLink="/postulaciones/buscar-empleos" 
+         class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+        <i class="fas fa-search mr-2"></i>Buscar empleos
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para ver detalle de aplicación -->
+<div *ngIf="mostrarDetalle && aplicacionSeleccionada" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+  <div class="relative top-10 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white mb-10">
+    <!-- Header del modal -->
+    <div class="flex items-center justify-between pb-4 border-b">
+      <h3 class="text-xl font-semibold text-gray-900">
+        Detalle de Aplicación
+      </h3>
+      <button (click)="cerrarDetalle()" class="text-gray-400 hover:text-gray-600">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <!-- Contenido del modal -->
+    <div class="mt-4 space-y-4">
+      <div>
+        <h4 class="font-semibold text-gray-900">{{ aplicacionSeleccionada.empleo_nombre }}</h4>
+        <p class="text-gray-600">{{ aplicacionSeleccionada.empresa_nombre }}</p>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="text-sm font-medium text-gray-700">Estado:</label>
+          <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium"
+                [ngClass]="obtenerColorEstado(aplicacionSeleccionada.status)">
+            {{ getStatusDescription(aplicacionSeleccionada.status) }}
+          </span>
+        </div>
+        <div>
+          <label class="text-sm font-medium text-gray-700">Fecha de aplicación:</label>
+          <p class="text-sm text-gray-900">{{ aplicacionSeleccionada.fecha_aplicacion | date:'dd/MM/yyyy HH:mm' }}</p>
+        </div>
+      </div>
+
+      <div *ngIf="aplicacionSeleccionada.carta_presentacion">
+        <label class="text-sm font-medium text-gray-700">Carta de presentación:</label>
+        <p class="text-sm text-gray-900 mt-1 whitespace-pre-line">{{ aplicacionSeleccionada.carta_presentacion }}</p>
+      </div>
+
+      <div *ngIf="aplicacionSeleccionada.salario_esperado" class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="text-sm font-medium text-gray-700">Salario esperado:</label>
+          <p class="text-sm text-gray-900">Q{{ aplicacionSeleccionada.salario_esperado | number:'1.0-0' }}</p>
+        </div>
+        <div *ngIf="aplicacionSeleccionada.disponibilidad_inicio">
+          <label class="text-sm font-medium text-gray-700">Disponibilidad:</label>
+          <p class="text-sm text-gray-900">{{ aplicacionSeleccionada.disponibilidad_inicio | date:'dd/MM/yyyy' }}</p>
+        </div>
+      </div>
+
+      <div *ngIf="aplicacionSeleccionada.notas_rrhh" class="bg-blue-50 p-3 rounded-lg">
+        <label class="text-sm font-medium text-gray-700">Comentarios de RRHH:</label>
+        <p class="text-sm text-gray-900 mt-1">{{ aplicacionSeleccionada.notas_rrhh }}</p>
+      </div>
+    </div>
+
+    <!-- Footer del modal -->
+    <div class="mt-6 pt-4 border-t flex justify-end">
+      <button (click)="cerrarDetalle()"
+              class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+        Cerrar
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,943 @@
+<!-- gestionar-empleos.component.html - VERSIÓN COMPLETA Y CORREGIDA -->
+<div class="container mx-auto px-4 py-6">
+  <!-- Header -->
+  <div class="mb-6">
+    <div class="flex justify-between items-center mb-4">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">Gestión de Empleos</h1>
+        <p class="text-gray-600 mt-1">Administre las ofertas laborales de su empresa</p>
+      </div>
+      <div class="flex gap-3">
+        <!-- Botón Debug (temporal) -->
+        <button 
+          (click)="toggleDebugMode()"
+          class="px-3 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 text-sm">
+          <i class="fas fa-bug mr-1"></i>
+          Debug: {{ showDebugActions ? 'ON' : 'OFF' }}
+        </button>
+        
+        <button 
+          (click)="refreshData()"
+          [disabled]="loading"
+          class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 disabled:opacity-50">
+          <i class="fas fa-sync-alt" [class.fa-spin]="loading"></i>
+          Actualizar
+        </button>
+        <button 
+          *ngIf="canCreateEmpleo()"
+          (click)="openCreateModal()"
+          class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+          <i class="fas fa-plus mr-2"></i>
+          Crear Empleo
+        </button>
+      </div>
+    </div>
+
+    <!-- Estadísticas -->
+    <div *ngIf="stats" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+      <div class="bg-white p-4 rounded-lg shadow border-l-4 border-blue-500">
+        <div class="flex items-center">
+          <div class="flex-1">
+            <p class="text-sm font-medium text-gray-600">Total Empleos</p>
+            <p class="text-2xl font-bold text-gray-900">{{ stats.total_empleos }}</p>
+          </div>
+          <i class="fas fa-briefcase text-blue-500 text-2xl"></i>
+        </div>
+      </div>
+      <div class="bg-white p-4 rounded-lg shadow border-l-4 border-green-500">
+        <div class="flex items-center">
+          <div class="flex-1">
+            <p class="text-sm font-medium text-gray-600">Empleos Activos</p>
+            <p class="text-2xl font-bold text-gray-900">{{ stats.empleos_activos }}</p>
+          </div>
+          <i class="fas fa-check-circle text-green-500 text-2xl"></i>
+        </div>
+      </div>
+      <div class="bg-white p-4 rounded-lg shadow border-l-4 border-red-500">
+        <div class="flex items-center">
+          <div class="flex-1">
+            <p class="text-sm font-medium text-gray-600">Urgentes</p>
+            <p class="text-2xl font-bold text-gray-900">{{ stats.empleos_urgentes }}</p>
+          </div>
+          <i class="fas fa-exclamation-triangle text-red-500 text-2xl"></i>
+        </div>
+      </div>
+      <div class="bg-white p-4 rounded-lg shadow border-l-4 border-purple-500">
+        <div class="flex items-center">
+          <div class="flex-1">
+            <p class="text-sm font-medium text-gray-600">Total Aplicaciones</p>
+            <p class="text-2xl font-bold text-gray-900">{{ stats.total_aplicaciones }}</p>
+          </div>
+          <i class="fas fa-users text-purple-500 text-2xl"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="bg-white rounded-lg shadow p-6 mb-6">
+    <h3 class="text-lg font-semibold mb-4">Filtros de Búsqueda</h3>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-4">
+      <!-- Búsqueda general -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Buscar</label>
+        <input
+          type="text"
+          [(ngModel)]="searchTerm"
+          (input)="applyFilters()"
+          placeholder="Nombre, descripción, empresa..."
+          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+      </div>
+
+      <!-- Filtro por categoría -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
+        <select
+          [(ngModel)]="categoriaFilter"
+          (change)="applyFilters()"
+          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <option value="all">Todas las categorías</option>
+          <option *ngFor="let categoria of getCategorias()" [value]="categoria">
+            {{ getCategoriaLegible(categoria) }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Filtro por estado -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
+        <select
+          [(ngModel)]="estadoFilter"
+          (change)="applyFilters()"
+          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <option value="all">Todos los estados</option>
+          <option value="activo">Activo</option>
+          <option value="expirado">Expirado</option>
+          <option value="cerrado">Cerrado</option>
+          <option value="pausado">Pausado</option>
+          <option value="inactivo">Inactivo</option>
+        </select>
+      </div>
+
+      <!-- Filtro por urgencia -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Urgencia</label>
+        <select
+          [(ngModel)]="urgenciaFilter"
+          (change)="applyFilters()"
+          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <option value="all">Todas</option>
+          <option value="urgente">Urgente</option>
+          <option value="normal">Normal</option>
+          <option value="bajo">Bajo</option>
+        </select>
+      </div>
+
+      <!-- Filtro por empresa -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Empresa</label>
+        <select
+          [(ngModel)]="empresaFilter"
+          (change)="applyFilters()"
+          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <option value="all">Todas las empresas</option>
+          <option *ngFor="let empresa of empresasDisponibles" [value]="empresa.id">
+            {{ empresa.nombre }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Filtro por jornada -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Jornada</label>
+        <select
+          [(ngModel)]="jornadaFilter"
+          (change)="applyFilters()"
+          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <option value="all">Todas</option>
+          <option value="tiempo_completo">Tiempo Completo</option>
+          <option value="medio_tiempo">Medio Tiempo</option>
+          <option value="por_horas">Por Horas</option>
+        </select>
+      </div>
+
+      <!-- Filtro por modalidad -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Modalidad</label>
+        <select
+          [(ngModel)]="modalidadFilter"
+          (change)="applyFilters()"
+          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <option value="all">Todas</option>
+          <option value="remoto">Remoto</option>
+          <option value="hibrido">Híbrido</option>
+          <option value="presencial">Presencial</option>
+        </select>
+      </div>
+
+      <!-- Botón limpiar filtros -->
+      <div class="flex items-end">
+        <button
+          (click)="clearFilters()"
+          [disabled]="!hasActiveFilters()"
+          class="w-full px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed">
+          <i class="fas fa-times mr-2"></i>
+          Limpiar
+        </button>
+      </div>
+    </div>
+
+    <!-- Resultados de filtros -->
+    <div class="flex justify-between items-center text-sm text-gray-600">
+      <span>
+        Mostrando {{ paginatedEmpleos.length }} de {{ empleosFiltrados.length }} empleos
+        <span *ngIf="hasActiveFilters()" class="font-medium">(filtrados de {{ empleos.length }} total)</span>
+      </span>
+      <button
+        (click)="exportToCsv()"
+        [disabled]="empleosFiltrados.length === 0"
+        class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50">
+        <i class="fas fa-download mr-1"></i>
+        Exportar CSV
+      </button>
+    </div>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+    <i class="fas fa-exclamation-triangle mr-2"></i>
+    {{ error }}
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="flex justify-center py-8">
+    <div class="text-center">
+      <i class="fas fa-spinner fa-spin text-3xl text-blue-500 mb-2"></i>
+      <p class="text-gray-600">Cargando empleos...</p>
+    </div>
+  </div>
+
+  <!-- Lista de Empleos -->
+  <div *ngIf="!loading" class="bg-white rounded-lg shadow overflow-hidden">
+    <div *ngIf="paginatedEmpleos.length === 0" class="p-8 text-center">
+      <i class="fas fa-briefcase text-4xl text-gray-400 mb-4"></i>
+      <p class="text-gray-600 text-lg">{{ getNoDataMessage() }}</p>
+    </div>
+
+    <div *ngIf="paginatedEmpleos.length > 0">
+      <!-- Header de tabla -->
+      <div class="bg-gray-50 px-6 py-3 border-b border-gray-200">
+        <div class="grid grid-cols-12 gap-4 text-sm font-medium text-gray-700">
+          <div class="col-span-3">Empleo</div>
+          <div class="col-span-2">Empresa</div>
+          <div class="col-span-2">Categoría</div>
+          <div class="col-span-1">Estado</div>
+          <div class="col-span-1">Urgencia</div>
+          <div class="col-span-1">Aplicaciones</div>
+          <div class="col-span-2">Acciones</div>
+        </div>
+      </div>
+
+      <!-- Filas de empleos -->
+      <div class="divide-y divide-gray-200">
+        <div 
+          *ngFor="let empleo of paginatedEmpleos; trackBy: trackByEmpleoId"
+          class="px-6 py-4 hover:bg-gray-50">
+          <div class="grid grid-cols-12 gap-4 items-center">
+            <!-- Información del empleo -->
+            <div class="col-span-3">
+              <h4 class="font-medium text-gray-900">{{ empleo.nombre }}</h4>
+              <p class="text-sm text-gray-600 truncate">{{ formatModalidades(empleo.lugar_trabajo) }}</p>
+              <p class="text-sm text-gray-500">{{ formatSalario(empleo.salario) }}</p>
+            </div>
+
+            <!-- Empresa -->
+            <div class="col-span-2">
+              <p class="font-medium text-gray-900">{{ empleo.empresa_nombre }}</p>
+              <p class="text-sm text-gray-600">{{ empleo.jornada_laboral }}</p>
+            </div>
+
+            <!-- Categoría -->
+            <div class="col-span-2">
+              <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                {{ getCategoriaLegible(empleo.categoria) }}
+              </span>
+              <p class="text-sm text-gray-600 mt-1">{{ empleo.experiencia_laboral }}</p>
+            </div>
+
+            <!-- Estado -->
+            <div class="col-span-1">
+              <span 
+                class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
+                [ngClass]="{
+                  'bg-green-100 text-green-800': getEstadoLegible(empleo).color === 'green',
+                  'bg-red-100 text-red-800': getEstadoLegible(empleo).color === 'red',
+                  'bg-yellow-100 text-yellow-800': getEstadoLegible(empleo).color === 'yellow',
+                  'bg-gray-100 text-gray-800': getEstadoLegible(empleo).color === 'gray'
+                }">
+                {{ getEstadoLegible(empleo).texto }}
+              </span>
+              <p *ngIf="empleo.dias_restantes !== undefined" class="text-xs text-gray-500 mt-1">
+                {{ empleo.dias_restantes > 0 ? empleo.dias_restantes + ' días' : 'Expirado' }}
+              </p>
+            </div>
+
+            <!-- Urgencia -->
+            <div class="col-span-1">
+              <span 
+                class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
+                [ngClass]="{
+                  'bg-red-100 text-red-800': empleo.urgencia === 'urgente',
+                  'bg-blue-100 text-blue-800': empleo.urgencia === 'normal',
+                  'bg-gray-100 text-gray-800': empleo.urgencia === 'bajo'
+                }">
+                {{ empleo.urgencia }}
+              </span>
+            </div>
+
+            <!-- Aplicaciones -->
+            <div class="col-span-1">
+              <div class="text-center">
+                <p class="font-semibold text-gray-900">{{ empleo.aplicaciones_recibidas || 0 }}</p>
+                <p class="text-xs text-gray-600">postulantes</p>
+              </div>
+            </div>
+
+            <!-- Acciones -->
+            <div class="col-span-2">
+              <div class="flex gap-2">
+                <!-- Botón Ver - Siempre visible -->
+                <button
+                  (click)="openViewModal(empleo)"
+                  class="p-2 text-blue-600 hover:bg-blue-100 rounded transition-colors"
+                  title="Ver detalles"
+                  type="button">
+                  <i class="fas fa-eye"></i>
+                </button>
+                
+                <!-- Botón Editar - Condicional -->
+                <button
+                  *ngIf="canEditEmpleo(empleo)"
+                  (click)="openEditModal(empleo)"
+                  class="p-2 text-green-600 hover:bg-green-100 rounded transition-colors"
+                  title="Editar"
+                  type="button">
+                  <i class="fas fa-edit"></i>
+                </button>
+                
+                <!-- Botón Eliminar - Condicional -->
+                <button
+                  *ngIf="canEditEmpleo(empleo)"
+                  (click)="deleteEmpleo(empleo)"
+                  class="p-2 text-red-600 hover:bg-red-100 rounded transition-colors"
+                  title="Eliminar"
+                  type="button">
+                  <i class="fas fa-trash"></i>
+                </button>
+                
+                <!-- Botones de Debug - Solo cuando debug está activado -->
+               
+              </div>
+              
+              <!-- Debug info (solo cuando debug está activado) -->
+             
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Paginación -->
+      <div *ngIf="totalPages > 1" class="bg-gray-50 px-6 py-3 border-t border-gray-200">
+        <div class="flex items-center justify-between">
+          <div class="text-sm text-gray-700">
+            Página {{ currentPage }} de {{ totalPages }}
+          </div>
+          <div class="flex gap-2">
+            <button
+              (click)="prevPage()"
+              [disabled]="currentPage === 1"
+              class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-100 disabled:opacity-50">
+              <i class="fas fa-chevron-left"></i>
+            </button>
+            <button
+              *ngFor="let page of paginationPages"
+              (click)="goToPage(page)"
+              [class.bg-blue-500]="page === currentPage"
+              [class.text-white]="page === currentPage"
+              class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-100">
+              {{ page }}
+            </button>
+            <button
+              (click)="nextPage()"
+              [disabled]="currentPage === totalPages"
+              class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-100 disabled:opacity-50">
+              <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para Crear/Editar/Ver Empleo -->
+<div 
+  *ngIf="showModal" 
+  class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+  (click)="$event.target === $event.currentTarget && closeModal()">
+  
+  <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+    <!-- Header del Modal -->
+    <div class="flex justify-between items-center p-6 border-b border-gray-200">
+      <h2 class="text-xl font-semibold">
+        <span *ngIf="modalMode === 'create'">Crear Nuevo Empleo</span>
+        <span *ngIf="modalMode === 'edit'">Editar Empleo</span>
+        <span *ngIf="modalMode === 'view'">Detalles del Empleo</span>
+      </h2>
+      <button 
+        (click)="closeModal()"
+        class="text-gray-500 hover:text-gray-700">
+        <i class="fas fa-times text-xl"></i>
+      </button>
+    </div>
+
+    <!-- Contenido del Modal -->
+    <div class="p-6">
+      <form (ngSubmit)="saveEmpleo()" #empleoFormRef="ngForm">
+        <!-- Información Básica -->
+        <div class="mb-6">
+          <h3 class="text-lg font-medium mb-4">Información Básica</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Nombre del empleo -->
+            <div class="md:col-span-2">
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                Nombre del Empleo *
+              </label>
+              <input
+                type="text"
+                [(ngModel)]="empleoForm.nombre"
+                name="nombre"
+                [readonly]="modalMode === 'view'"
+                required
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 read-only:bg-gray-100">
+            </div>
+
+            <!-- Empresa -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                Empresa *
+              </label>
+              <select
+                [(ngModel)]="empleoForm.empresa_id"
+                name="empresa_id"
+                [disabled]="modalMode === 'view'"
+                required
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100">
+                <option value="0">Seleccione una empresa</option>
+                <option *ngFor="let empresa of empresasDisponibles" [value]="empresa.id">
+                  {{ empresa.nombre }}
+                </option>
+              </select>
+            </div>
+
+            <!-- Categoría -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                Categoría *
+              </label>
+              <select
+                [(ngModel)]="empleoForm.categoria"
+                name="categoria"
+                [disabled]="modalMode === 'view'"
+                required
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100">
+                <option value="">Seleccione una categoría</option>
+                <option *ngFor="let categoria of getCategorias()" [value]="categoria">
+                  {{ getCategoriaLegible(categoria) }}
+                </option>
+              </select>
+            </div>
+
+            <!-- Número de vacantes -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                Número de Vacantes *
+              </label>
+              <input
+                type="number"
+                [(ngModel)]="empleoForm.numero_vacantes"
+                name="numero_vacantes"
+                [readonly]="modalMode === 'view'"
+                min="1"
+                required
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 read-only:bg-gray-100">
+            </div>
+
+            <!-- Experiencia laboral -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                Experiencia Requerida
+              </label>
+              <select
+                [(ngModel)]="empleoForm.experiencia_laboral"
+                name="experiencia_laboral"
+                [disabled]="modalMode === 'view'"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100">
+                <option value="">No especificado</option>
+                <option *ngFor="let nivel of getNivelesExperiencia()" [value]="nivel">
+                  {{ nivel }}
+                </option>
+              </select>
+            </div>
+
+            <!-- Jornada laboral -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                Jornada Laboral *
+              </label>
+              <select
+                [(ngModel)]="empleoForm.jornada_laboral"
+                name="jornada_laboral"
+                [disabled]="modalMode === 'view'"
+                required
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100">
+                <option value="">Seleccione jornada</option>
+                <option value="tiempo_completo">Tiempo Completo</option>
+                <option value="medio_tiempo">Medio Tiempo</option>
+                <option value="por_horas">Por Horas</option>
+              </select>
+            </div>
+
+            <!-- Tipo de contrato -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                Tipo de Contrato *
+              </label>
+              <select
+                [(ngModel)]="empleoForm.tipo_contrato"
+                name="tipo_contrato"
+                [disabled]="modalMode === 'view'"
+                required
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100">
+                <option value="">Seleccione tipo</option>
+                <option *ngFor="let tipo of getTiposContrato()" [value]="tipo">
+                  {{ tipo }}
+                </option>
+              </select>
+            </div>
+
+            <!-- Urgencia -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                Urgencia
+              </label>
+              <select
+                [(ngModel)]="empleoForm.urgencia"
+                name="urgencia"
+                [disabled]="modalMode === 'view'"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100">
+                <option value="bajo">Bajo</option>
+                <option value="normal">Normal</option>
+                <option value="urgente">Urgente</option>
+              </select>
+            </div>
+
+            <!-- Fecha fin publicación -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                Fecha Fin Publicación *
+              </label>
+              <input
+                type="date"
+                [(ngModel)]="empleoForm.fecha_fin_publicacion"
+                name="fecha_fin_publicacion"
+                [readonly]="modalMode === 'view'"
+                [min]="getMinDate()"
+                required
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 read-only:bg-gray-100">
+            </div>
+          </div>
+        </div>
+
+        <!-- Modalidades de Trabajo - VERSIÓN DROPDOWN CORREGIDA -->
+        <div class="mb-6">
+          <h3 class="text-lg font-medium mb-4">Modalidad de Trabajo *</h3>
+          
+          <!-- Dropdown simple para modalidad -->
+          <div class="grid grid-cols-1 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                Seleccione la modalidad de trabajo
+              </label>
+              <select
+                [ngModel]="getSelectedModalidad()"
+                (ngModelChange)="onModalidadSelectChange({target: {value: $event}})"
+                name="modalidad_trabajo"
+                [disabled]="modalMode === 'view'"
+                required
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100">
+                <option value="">Seleccione una modalidad</option>
+                <option *ngFor="let modalidad of getModalidadesTrabajo(); trackBy: trackByIndex" [value]="modalidad">
+                  {{ modalidad | titlecase }}
+                </option>
+              </select>
+            </div>
+          </div>
+          
+          <!-- Mensaje de ayuda -->
+          <div *ngIf="modalMode !== 'view'" class="text-xs text-gray-500 mt-2">
+            <i class="fas fa-info-circle mr-1"></i>
+            Seleccione la modalidad de trabajo para esta oferta laboral
+          </div>
+          
+          <!-- Mostrar modalidad seleccionada -->
+          <div *ngIf="hasSelectedModalidad()" class="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <div class="flex items-center text-blue-800">
+              <i class="fas fa-check-circle mr-2"></i>
+              <span class="font-medium">Modalidad seleccionada:</span>
+              <span class="ml-2 capitalize">{{ getSelectedModalidad() }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Información Salarial -->
+        <div class="mb-6">
+          <h3 class="text-lg font-medium mb-4">Información Salarial</h3>
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                Salario Mínimo
+              </label>
+              <input
+                type="number"
+                [(ngModel)]="empleoForm.salario!.minimo"
+                name="salario_minimo"
+                [readonly]="modalMode === 'view'"
+                min="0"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 read-only:bg-gray-100">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                Salario Máximo
+              </label>
+              <input
+                type="number"
+                [(ngModel)]="empleoForm.salario!.maximo"
+                name="salario_maximo"
+                [readonly]="modalMode === 'view'"
+                min="0"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 read-only:bg-gray-100">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                Moneda
+              </label>
+              <select
+                [(ngModel)]="empleoForm.salario!.moneda"
+                name="moneda"
+                [disabled]="modalMode === 'view'"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100">
+                <option value="GTQ">GTQ (Quetzales)</option>
+                <option value="USD">USD (Dólares)</option>
+                <option value="EUR">EUR (Euros)</option>
+              </select>
+            </div>
+            <div class="flex items-center">
+              <input
+                type="checkbox"
+                [(ngModel)]="empleoForm.salario!.negociable"
+                name="negociable"
+                [disabled]="modalMode === 'view'"
+                id="negociable"
+                class="mr-2">
+              <label for="negociable" class="text-sm text-gray-700">
+                Negociable
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Descripción del Empleo -->
+        <div class="mb-6">
+          <h3 class="text-lg font-medium mb-4">Descripción del Empleo</h3>
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Descripción General *
+            </label>
+            <textarea
+              [(ngModel)]="empleoForm.descripcion!.descripcion"
+              name="descripcion"
+              [readonly]="modalMode === 'view'"
+              rows="4"
+              required
+              placeholder="Describe las responsabilidades principales del puesto..."
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 read-only:bg-gray-100"></textarea>
+          </div>
+
+          <!-- Requisitos -->
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Requisitos del Puesto
+            </label>
+            <div *ngFor="let requisito of empleoForm.descripcion!.requisitos; let i = index; trackBy: trackByIndex" class="flex gap-2 mb-2">
+              <input
+                type="text"
+                [(ngModel)]="empleoForm.descripcion!.requisitos[i]"
+                [name]="'requisito_' + i"
+                [readonly]="modalMode === 'view'"
+                placeholder="Ej: Título universitario en..."
+                class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 read-only:bg-gray-100">
+              <button
+                *ngIf="modalMode !== 'view'"
+                type="button"
+                (click)="removeRequisito(i)"
+                class="px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+            <button
+              *ngIf="modalMode !== 'view'"
+              type="button"
+              (click)="addRequisito()"
+              class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+              <i class="fas fa-plus mr-2"></i>
+              Agregar Requisito
+            </button>
+          </div>
+
+          <!-- Beneficios -->
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Beneficios Ofrecidos
+            </label>
+            <div *ngFor="let beneficio of empleoForm.descripcion!.beneficios; let i = index; trackBy: trackByIndex" class="flex gap-2 mb-2">
+              <input
+                type="text"
+                [(ngModel)]="empleoForm.descripcion!.beneficios[i]"
+                [name]="'beneficio_' + i"
+                [readonly]="modalMode === 'view'"
+                placeholder="Ej: Seguro médico..."
+                class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 read-only:bg-gray-100">
+              <button
+                *ngIf="modalMode !== 'view'"
+                type="button"
+                (click)="removeBeneficio(i)"
+                class="px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+            <button
+              *ngIf="modalMode !== 'view'"
+              type="button"
+              (click)="addBeneficio()"
+              class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+              <i class="fas fa-plus mr-2"></i>
+              Agregar Beneficio
+            </button>
+          </div>
+
+          <!-- Habilidades -->
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Habilidades Técnicas
+            </label>
+            <div *ngFor="let habilidad of empleoForm.descripcion!.habilidades; let i = index; trackBy: trackByIndex" class="flex gap-2 mb-2">
+              <input
+                type="text"
+                [(ngModel)]="empleoForm.descripcion!.habilidades[i]"
+                [name]="'habilidad_' + i"
+                [readonly]="modalMode === 'view'"
+                placeholder="Ej: JavaScript, Angular..."
+                class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 read-only:bg-gray-100">
+              <button
+                *ngIf="modalMode !== 'view'"
+                type="button"
+                (click)="removeHabilidad(i)"
+                class="px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+            <button
+              *ngIf="modalMode !== 'view'"
+              type="button"
+              (click)="addHabilidad()"
+              class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+              <i class="fas fa-plus mr-2"></i>
+              Agregar Habilidad
+            </button>
+          </div>
+
+          <!-- Idiomas -->
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Idiomas Requeridos
+            </label>
+            <div *ngFor="let idioma of empleoForm.descripcion!.idiomas; let i = index; trackBy: trackByIndex" class="flex gap-2 mb-2">
+              <input
+                type="text"
+                [(ngModel)]="empleoForm.descripcion!.idiomas[i]"
+                [name]="'idioma_' + i"
+                [readonly]="modalMode === 'view'"
+                placeholder="Ej: Inglés avanzado..."
+                class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 read-only:bg-gray-100">
+              <button
+                *ngIf="modalMode !== 'view'"
+                type="button"
+                (click)="removeIdioma(i)"
+                class="px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+            <button
+              *ngIf="modalMode !== 'view'"
+              type="button"
+              (click)="addIdioma()"
+              class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+              <i class="fas fa-plus mr-2"></i>
+              Agregar Idioma
+            </button>
+          </div>
+        </div>
+
+        <!-- Información Adicional -->
+        <div class="mb-6">
+          <h3 class="text-lg font-medium mb-4">Información Adicional</h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Edad mínima -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                Edad Mínima
+              </label>
+              <input
+                type="number"
+                [(ngModel)]="empleoForm.edad_minima"
+                name="edad_minima"
+                [readonly]="modalMode === 'view'"
+                min="16"
+                max="100"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 read-only:bg-gray-100">
+            </div>
+
+            <!-- Edad máxima -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                Edad Máxima
+              </label>
+              <input
+                type="number"
+                [(ngModel)]="empleoForm.edad_maxima"
+                name="edad_maxima"
+                [readonly]="modalMode === 'view'"
+                min="16"
+                max="100"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 read-only:bg-gray-100">
+            </div>
+
+            <!-- Género -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                Género
+              </label>
+              <select
+                [(ngModel)]="empleoForm.genero"
+                name="genero"
+                [disabled]="modalMode === 'view'"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100">
+                <option value="indiferente">Indiferente</option>
+                <option value="masculino">Masculino</option>
+                <option value="femenino">Femenino</option>
+              </select>
+            </div>
+
+            <!-- Estado civil -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                Estado Civil
+              </label>
+              <select
+                [(ngModel)]="empleoForm.estado_civil"
+                name="estado_civil"
+                [disabled]="modalMode === 'view'"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100">
+                <option value="indiferente">Indiferente</option>
+                <option value="soltero">Soltero/a</option>
+                <option value="casado">Casado/a</option>
+              </select>
+            </div>
+
+            <!-- Nivel educación -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                Nivel de Educación
+              </label>
+              <select
+                [(ngModel)]="empleoForm.nivel_educacion"
+                name="nivel_educacion"
+                [disabled]="modalMode === 'view'"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100">
+                <option value="">No especificado</option>
+                <option *ngFor="let nivel of getNivelesEducacion()" [value]="nivel">
+                  {{ nivel }}
+                </option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Palabras Clave -->
+        <div class="mb-6">
+          <h3 class="text-lg font-medium mb-4">Palabras Clave para Búsqueda</h3>
+          <div *ngFor="let keyword of empleoForm.keywords!; let i = index; trackBy: trackByIndex" class="flex gap-2 mb-2">
+            <input
+              type="text"
+              [(ngModel)]="empleoForm.keywords![i]"
+              [name]="'keyword_' + i"
+              [readonly]="modalMode === 'view'"
+              placeholder="Ej: programador, developer, angular..."
+              class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 read-only:bg-gray-100">
+            <button
+              *ngIf="modalMode !== 'view'"
+              type="button"
+              (click)="removeKeyword(i)"
+              class="px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <button
+            *ngIf="modalMode !== 'view'"
+            type="button"
+            (click)="addKeyword()"
+            class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+            <i class="fas fa-plus mr-2"></i>
+            Agregar Palabra Clave
+          </button>
+        </div>
+
+        <!-- Error en modal -->
+        <div *ngIf="error" class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+          <i class="fas fa-exclamation-triangle mr-2"></i>
+          {{ error }}
+        </div>
+
+        <!-- Botones del Modal -->
+        <div class="flex justify-end gap-4 pt-4 border-t border-gray-200">
+          <button
+            type="button"
+            (click)="closeModal()"
+            class="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50">
+            {{ modalMode === 'view' ? 'Cerrar' : 'Cancelar' }}
+          </button>
+          <button
+            *ngIf="modalMode !== 'view'"
+            type="submit"
+            [disabled]="loading || !empleoFormRef.form.valid"
+            class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50">
+            <i class="fas fa-spinner fa-spin mr-2" *ngIf="loading"></i>
+            {{ modalMode === 'create' ? 'Crear Empleo' : 'Guardar Cambios' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
