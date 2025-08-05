@@ -1,4 +1,5 @@
-// src/app/guards/auth.guard.ts
+// src/app/guards/auth.guard.ts - VERSIÓN CORREGIDA COMPLETA
+
 import { Injectable } from '@angular/core';
 import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
@@ -36,21 +37,40 @@ export class AuthGuard implements CanActivate {
 
     // Obtener la ruta que se intenta acceder
     const targetRoute = state.url;
-    console.log('Verificando acceso a ruta:', targetRoute);
+    console.log('🔐 Verificando acceso a ruta:', targetRoute);
 
-    // Rutas que no requieren verificación de permisos específicos
-    const publicRoutes = ['/dashboard', '/login', '/register'];
-    if (publicRoutes.includes(targetRoute)) {
-      console.log('Ruta pública, acceso permitido');
+    // ✅ SOLUCIÓN: Rutas que NO requieren verificación de permisos específicos
+    const publicRoutes = [
+      '/dashboard', 
+      '/login', 
+      '/register'
+    ];
+
+    // ✅ IMPORTANTE: Permitir TODAS las rutas CV sin verificación de permisos
+    const cvRoutes = [
+      '/cv',
+      '/cv/mis-cvs',
+      '/cv/crear',
+      '/cv/editar',
+      '/cv/ver'
+    ];
+
+    // Verificar si es una ruta CV (incluyendo con parámetros)
+    const isCVRoute = cvRoutes.some(cvRoute => 
+      targetRoute.startsWith(cvRoute) // Permite /cv/editar/123, /cv/ver/456, etc.
+    );
+
+    if (publicRoutes.includes(targetRoute) || isCVRoute) {
+      console.log('✅ Ruta permitida sin verificación de permisos:', targetRoute);
       return true;
     }
 
     try {
-      // Verificar si el usuario tiene permisos para acceder a la ruta
+      // Para otras rutas, verificar permisos normalmente
       const hasPermission = await this.permissionsService.canAccessRoute(targetRoute);
       
       if (!hasPermission) {
-        console.log('Usuario sin permisos para acceder a:', targetRoute);
+        console.log('❌ Usuario sin permisos para acceder a:', targetRoute);
         // Redirigir a dashboard si no tiene permisos
         this.router.navigate(['/dashboard'], {
           queryParams: { 
@@ -61,18 +81,19 @@ export class AuthGuard implements CanActivate {
         return false;
       }
 
-      console.log('Acceso autorizado a:', targetRoute);
+      console.log('✅ Acceso autorizado a:', targetRoute);
       return true;
 
     } catch (error) {
-      console.error('Error verificando permisos:', error);
-      // En caso de error, permitir acceso por defecto pero registrar el error
+      console.error('💥 Error verificando permisos:', error);
+      // En caso de error para rutas no-CV, permitir acceso pero registrar el error
+      console.log('⚠️ Permitiendo acceso por error en verificación');
       return true;
     }
   }
 }
 
-// Guard adicional para verificar permisos específicos
+// Guard adicional para verificar permisos específicos (NO USADO EN CV)
 @Injectable({
   providedIn: 'root'
 })
@@ -159,8 +180,18 @@ export class RoleGuard implements CanActivate {
       return true; // Si no se especifican perfiles requeridos, permitir acceso
     }
 
-    const userProfile = currentUser?.id_perfil;
-    if (!userProfile) {
+    // ✅ CORRECCIÓN: Verificar que currentUser existe y tiene id_perfil
+    if (!currentUser) {
+      console.log('Usuario no encontrado');
+      this.router.navigate(['/dashboard'], {
+        queryParams: { error: 'user_not_found' }
+      });
+      return false;
+    }
+
+    // ✅ CORRECCIÓN: Verificar que id_perfil existe antes de usarlo
+    const userProfile = currentUser.id_perfil;
+    if (userProfile === undefined || userProfile === null) {
       console.log('Usuario sin perfil asignado');
       this.router.navigate(['/dashboard'], {
         queryParams: { error: 'no_profile' }
@@ -168,6 +199,7 @@ export class RoleGuard implements CanActivate {
       return false;
     }
 
+    // ✅ AHORA userProfile es definitivamente un number
     if (!requiredProfiles.includes(userProfile)) {
       console.log('Perfil insuficiente:', userProfile, 'Requeridos:', requiredProfiles);
       this.router.navigate(['/dashboard'], {

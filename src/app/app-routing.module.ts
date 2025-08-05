@@ -19,7 +19,7 @@ import { GestionarEmpresasComponent } from './gestionar-empresas/gestionar-empre
 import { GestionarEmpleosComponent } from './gestionar-empleos/gestionar-empleos/gestionar-empleos.component';
 
 // =============================================
-// IMPORTAR COMPONENTES DE POSTULACIONES - CORREGIDO PARA TU ESTRUCTURA ✅
+// IMPORTAR COMPONENTES DE POSTULACIONES
 // =============================================
 import { MisAplicacionesComponent } from './mis-aplicaciones/mis-aplicaciones/mis-aplicaciones.component';
 import { BuscarEmpleosComponent } from './buscar-empleos/buscar-empleos/buscar-empleos.component';
@@ -133,9 +133,14 @@ const routes: Routes = [
       },
 
       // =============================================
-      // MÓDULO DE CV
+      // MÓDULO DE CV - RESTAURADO A LA VERSIÓN ORIGINAL ✅
       // =============================================
-      {
+    // src/app/app-routing.module.ts - SECCIÓN CV CORREGIDA
+
+// =============================================
+// MÓDULO DE CV - VERSIÓN CORREGIDA PARA PERMISOS
+// =============================================
+ {
         path: 'cv',
         children: [
           {
@@ -146,40 +151,44 @@ const routes: Routes = [
           {
             path: 'mis-cvs',
             component: CVListComponent,
-            canActivate: [AuthGuard], // Solo verificar autenticación
+            canActivate: [AuthGuard], // ✅ Solo verificar autenticación
             data: {
-              title: 'Mis CVs'
+              title: 'Mis CVs',
+              breadcrumb: 'Mis CVs'
             }
           },
           {
             path: 'crear',
             component: CVFormComponent,
-            canActivate: [AuthGuard],
+            canActivate: [AuthGuard], // ✅ Solo verificar autenticación
             data: {
-              title: 'Crear CV'
+              title: 'Crear CV',
+              breadcrumb: 'Crear CV'
             }
           },
           {
             path: 'editar/:id',
             component: CVFormComponent,
-            canActivate: [AuthGuard],
+            canActivate: [AuthGuard], // ✅ Solo verificar autenticación
             data: {
-              title: 'Editar CV'
+              title: 'Editar CV',
+              breadcrumb: 'Editar CV'
             }
           },
           {
             path: 'ver/:id',
             component: CVViewComponent,
-            canActivate: [AuthGuard],
+            canActivate: [AuthGuard], // ✅ Solo verificar autenticación
             data: {
-              title: 'Ver CV'
+              title: 'Ver CV',
+              breadcrumb: 'Ver CV'
             }
           }
         ]
       },
 
       // =============================================
-      // MÓDULO DE POSTULACIONES ✅
+      // MÓDULO DE POSTULACIONES
       // =============================================
       {
         path: 'postulaciones',
