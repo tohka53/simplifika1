@@ -1,8 +1,12 @@
 // src/app/components/register/register.component.ts
-import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
+import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
-import { RegisterData } from '../../interfaces/user.interfaces';
+import { 
+  RegisterData, 
+  getUserTypeConfig,
+  USER_TYPE_CONFIGS 
+} from '../../interfaces/user.interfaces';
 
 @Component({
   selector: 'app-register',
@@ -10,13 +14,17 @@ import { RegisterData } from '../../interfaces/user.interfaces';
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.css']
 })
-export class RegisterComponent {
+export class RegisterComponent implements OnInit {
+  
+  // Tipo de usuario seleccionado
+  userType: 'reclutador' | 'candidato' = 'candidato';
+  
   user: RegisterData = {
     username: '',
     full_name: '',
     password: '',
     status: 1,
-    id_perfil: 2 // Perfil "Usuario" por defecto
+    id_perfil: 2 // Por defecto candidato ✅
   };
   
   confirmPassword = '';
@@ -28,13 +36,38 @@ export class RegisterComponent {
 
   constructor(
     private authService: AuthService,
-    private router: Router
-  ) {
-    console.log('RegisterComponent inicializado');
+    private router: Router,
+    private route: ActivatedRoute
+  ) {}
+
+  ngOnInit(): void {
+    // Verificar si se pasó el tipo como query parameter desde login
+    this.route.queryParams.subscribe(params => {
+      if (params['type'] && (params['type'] === 'reclutador' || params['type'] === 'candidato')) {
+        this.selectUserType(params['type']);
+      }
+    });
+  }
+
+  /**
+   * Selecciona el tipo de usuario y ajusta el perfil
+   */
+  selectUserType(type: 'reclutador' | 'candidato'): void {
+    this.userType = type;
+    
+    // Ajustar el perfil por defecto según el tipo
+    this.user.id_perfil = type === 'reclutador' ? 3 : 2; // 3 = Reclutador, 2 = Candidato ✅
+    this.user.userType = type;
+    
+    // Limpiar mensajes al cambiar tipo
+    this.errorMessage = '';
+    this.successMessage = '';
+    
+    console.log('Tipo de registro seleccionado:', type, 'Perfil ID:', this.user.id_perfil);
   }
 
   async onRegister(): Promise<void> {
-    console.log('onRegister llamado');
+    console.log('onRegister llamado para tipo:', this.userType);
     console.log('Datos del formulario:', this.user);
 
     // Limpiar mensajes previos
@@ -42,42 +75,7 @@ export class RegisterComponent {
     this.successMessage = '';
 
     // Validaciones
-    if (!this.user.username || !this.user.full_name || !this.user.password || !this.confirmPassword) {
-      this.errorMessage = 'Por favor complete todos los campos';
-      console.log('Error: Campos vacíos');
-      return;
-    }
-
-    if (this.user.password !== this.confirmPassword) {
-      this.errorMessage = 'Las contraseñas no coinciden';
-      console.log('Error: Contraseñas no coinciden');
-      return;
-    }
-
-    if (this.user.password.length < 6) {
-      this.errorMessage = 'La contraseña debe tener al menos 6 caracteres';
-      console.log('Error: Contraseña muy corta');
-      return;
-    }
-
-    if (this.user.username.length < 3) {
-      this.errorMessage = 'El nombre de usuario debe tener al menos 3 caracteres';
-      console.log('Error: Username muy corto');
-      return;
-    }
-
-    // Validar que no haya espacios en el username
-    if (this.user.username.includes(' ')) {
-      this.errorMessage = 'El nombre de usuario no puede contener espacios';
-      console.log('Error: Username con espacios');
-      return;
-    }
-
-    // Validar caracteres especiales en username
-    const usernamePattern = /^[a-zA-Z0-9_.-]+$/;
-    if (!usernamePattern.test(this.user.username)) {
-      this.errorMessage = 'El nombre de usuario solo puede contener letras, números, guiones, puntos y guiones bajos';
-      console.log('Error: Username con caracteres inválidos');
+    if (!this.validateForm()) {
       return;
     }
 
@@ -89,53 +87,151 @@ export class RegisterComponent {
       console.log('Resultado del registro:', result);
       
       if (result.success) {
-        this.successMessage = 'Usuario creado exitosamente. Redirigiendo al login...';
-        console.log('Registro exitoso, redirigiendo...');
+        this.successMessage = `Usuario ${this.userType} creado exitosamente. `;
         
-        // Limpiar formulario
-        this.user = {
-          username: '',
-          full_name: '',
-          password: '',
-          status: 1,
-          id_perfil: 2
-        };
-        this.confirmPassword = '';
-
-        setTimeout(() => {
-          this.router.navigate(['/login']);
-        }, 2000);
+        // Opcional: Auto-login después del registro
+        if (result.user) {
+          this.successMessage += 'Redirigiendo al login...';
+          setTimeout(() => {
+            this.router.navigate(['/login']);
+          }, 2000);
+        }
       } else {
-        this.errorMessage = result.message;
-        console.log('Error en registro:', result.message);
+        console.log('Registro falló:', result.message);
+        this.errorMessage = this.getErrorMessage(result.message);
       }
     } catch (error) {
-      console.error('Error inesperado:', error);
+      console.error('Error inesperado en registro:', error);
       this.errorMessage = 'Error inesperado. Intente nuevamente.';
     } finally {
       this.loading = false;
     }
   }
 
+  /**
+   * Valida el formulario de registro
+   */
+  private validateForm(): boolean {
+    // Validación de campos requeridos
+    if (!this.user.username || !this.user.full_name || !this.user.password || !this.confirmPassword) {
+      this.errorMessage = 'Por favor complete todos los campos';
+      return false;
+    }
+
+    // Validación de contraseñas
+    if (this.user.password !== this.confirmPassword) {
+      this.errorMessage = 'Las contraseñas no coinciden';
+      return false;
+    }
+
+    if (this.user.password.length < 6) {
+      this.errorMessage = 'La contraseña debe tener al menos 6 caracteres';
+      return false;
+    }
+
+    // Validación de username
+    if (this.user.username.length < 3) {
+      this.errorMessage = 'El nombre de usuario debe tener al menos 3 caracteres';
+      return false;
+    }
+
+    if (this.user.username.includes(' ')) {
+      this.errorMessage = 'El nombre de usuario no puede contener espacios';
+      return false;
+    }
+
+    const usernamePattern = /^[a-zA-Z0-9_.-]+$/;
+    if (!usernamePattern.test(this.user.username)) {
+      this.errorMessage = 'El nombre de usuario solo puede contener letras, números, guiones, puntos y guiones bajos';
+      return false;
+    }
+
+    // Validación específica por tipo de usuario
+    if (this.userType === 'reclutador') {
+      if (!this.user.full_name.includes(' ')) {
+        this.errorMessage = 'Para reclutadores, ingrese nombre y apellido completos';
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  /**
+   * Personaliza el mensaje de error según el contexto
+   */
+  private getErrorMessage(originalMessage: string): string {
+    const typeLabel = this.userType === 'reclutador' ? 'reclutador' : 'candidato';
+    
+    if (originalMessage.toLowerCase().includes('already exists') || 
+        originalMessage.toLowerCase().includes('ya existe')) {
+      return `Ya existe una cuenta ${typeLabel} con este nombre de usuario`;
+    }
+    
+    if (originalMessage.toLowerCase().includes('email')) {
+      return `Error con el email para el registro de ${typeLabel}`;
+    }
+    
+    return originalMessage;
+  }
+
+  /**
+   * Alterna la visibilidad de la contraseña
+   */
   togglePasswordVisibility(): void {
     this.showPassword = !this.showPassword;
-    console.log('Password visibility toggled:', this.showPassword);
   }
 
+  /**
+   * Alterna la visibilidad de la confirmación de contraseña
+   */
   toggleConfirmPasswordVisibility(): void {
     this.showConfirmPassword = !this.showConfirmPassword;
-    console.log('Confirm password visibility toggled:', this.showConfirmPassword);
   }
 
+  /**
+   * Navega de regreso al login
+   */
   goToLogin(): void {
-    console.log('Navegando a login');
     this.router.navigate(['/login']);
   }
 
-  // Método para debugging - puedes llamarlo desde el template
-  testButton(): void {
-    console.log('Test button clicked!');
-    console.log('Current user data:', this.user);
-    console.log('Confirm password:', this.confirmPassword);
+  /**
+   * Obtiene la configuración del tipo de usuario actual
+   */
+  getCurrentTypeConfig() {
+    return getUserTypeConfig(this.userType);
+  }
+
+  /**
+   * Obtiene las clases CSS del tema
+   */
+  getThemeClass(): string {
+    return getUserTypeConfig(this.userType).themeClass;
+  }
+
+  /**
+   * Obtiene el color del tema
+   */
+  getThemeColor(): string {
+    return getUserTypeConfig(this.userType).color;
+  }
+
+  /**
+   * Obtiene el placeholder para el campo de nombre según el tipo
+   */
+  getNamePlaceholder(): string {
+    return this.userType === 'reclutador' 
+      ? 'Nombre completo del reclutador'
+      : 'Nombre completo';
+  }
+
+  /**
+   * Obtiene el placeholder para el username según el tipo
+   */
+  getUsernamePlaceholder(): string {
+    return this.userType === 'reclutador' 
+      ? 'Usuario empresarial'
+      : 'Nombre de usuario';
   }
 }

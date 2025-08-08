@@ -1,8 +1,8 @@
 <!-- src/app/components/register/register.component.html -->
-<div class="min-h-screen bg-gradient-to-br from-green-50 to-teal-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+<div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
   <div class="max-w-md w-full space-y-8">
     <div class="text-center">
-      <div class="mx-auto h-12 w-12 bg-green-600 rounded-full flex items-center justify-center">
+      <div class="mx-auto h-12 w-12 bg-indigo-600 rounded-full flex items-center justify-center">
         <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
         </svg>
@@ -11,30 +11,81 @@
         Crear Cuenta
       </h2>
       <p class="mt-2 text-sm text-gray-600">
-        Regístrate para comenzar
+        Únete a nuestra plataforma de empleo
       </p>
     </div>
 
-  
-
     <div class="bg-white rounded-lg shadow-xl p-8">
-      <form class="space-y-6" (ngSubmit)="onRegister()" #registerForm="ngForm">
+      <!-- Selector de Tipo de Usuario -->
+      <div class="flex mb-6 bg-gray-100 rounded-lg p-1">
+        <button
+          type="button"
+          (click)="selectUserType('candidato')"
+          [class]="userType === 'candidato' 
+            ? 'flex-1 py-2 px-4 text-sm font-medium text-white bg-green-600 rounded-md shadow-sm transition-all duration-200' 
+            : 'flex-1 py-2 px-4 text-sm font-medium text-gray-700 hover:text-gray-900 transition-all duration-200'"
+        >
+          <span class="flex items-center justify-center">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+            Candidato
+          </span>
+        </button>
+        <button
+          type="button"
+          (click)="selectUserType('reclutador')"
+          [class]="userType === 'reclutador' 
+            ? 'flex-1 py-2 px-4 text-sm font-medium text-white bg-blue-600 rounded-md shadow-sm transition-all duration-200' 
+            : 'flex-1 py-2 px-4 text-sm font-medium text-gray-700 hover:text-gray-900 transition-all duration-200'"
+        >
+          <span class="flex items-center justify-center">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg>
+            Reclutador
+          </span>
+        </button>
+      </div>
+
+      <!-- Información del tipo seleccionado -->
+      <div class="mb-6 p-4 rounded-lg" [ngClass]="'bg-' + getThemeColor() + '-50 border border-' + getThemeColor() + '-200'">
+        <div class="flex items-start">
+          <div [ngClass]="'text-' + getThemeColor() + '-600'">
+            <svg class="w-5 h-5 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <div class="text-sm" [ngClass]="'text-' + getThemeColor() + '-800'">
+            <p class="font-medium">{{ getCurrentTypeConfig().title }}</p>
+            <p class="text-xs mt-1">{{ getCurrentTypeConfig().description }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Formulario de Registro -->
+      <form class="space-y-6" (ngSubmit)="onRegister()">
         <!-- Campo Nombre Completo -->
         <div>
-          <label for="fullName" class="block text-sm font-medium text-gray-700">
+          <label for="full_name" class="block text-sm font-medium text-gray-700">
             Nombre Completo
           </label>
           <div class="mt-1 relative">
             <input
-              id="fullName"
-              name="fullName"
+              id="full_name"
+              name="full_name"
               type="text"
               autocomplete="name"
               required
               [(ngModel)]="user.full_name"
-              class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
-              placeholder="Ingresa tu nombre completo"
+              class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+              [placeholder]="getNamePlaceholder()"
             />
+            <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
+              <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+            </div>
           </div>
         </div>
 
@@ -51,9 +102,14 @@
               autocomplete="username"
               required
               [(ngModel)]="user.username"
-              class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
-              placeholder="Elige un nombre de usuario"
+              class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+              [placeholder]="getUsernamePlaceholder()"
             />
+            <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
+              <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m-2-2a2 2 0 00-2 2m2-2v2.5M9 9l3 3m0 0l3-3M6 12h.01M18 12h.01" />
+              </svg>
+            </div>
           </div>
         </div>
 
@@ -70,8 +126,8 @@
               autocomplete="new-password"
               required
               [(ngModel)]="user.password"
-              class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm pr-10"
-              placeholder="Crea una contraseña"
+              class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm pr-10"
+              placeholder="Mínimo 6 caracteres"
             />
             <button
               type="button"
@@ -102,8 +158,8 @@
               autocomplete="new-password"
               required
               [(ngModel)]="confirmPassword"
-              class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm pr-10"
-              placeholder="Confirma tu contraseña"
+              class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm pr-10"
+              placeholder="Repite tu contraseña"
             />
             <button
               type="button"
@@ -145,47 +201,43 @@
           </div>
         </div>
 
-        <!-- Botones de Test (solo para debug) -->
-        <div class="flex space-x-2">
-          <button
-            type="button"
-            (click)="onRegister()"
-            class="flex-1 bg-yellow-500 text-white py-2 px-4 rounded text-sm"
-          >
-            Test onRegister()
-          </button>
-        </div>
-
         <!-- Botón de Registro -->
         <div>
           <button
             type="submit"
             [disabled]="loading"
-            class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+            [ngClass]="'group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-' + getThemeColor() + '-600 hover:bg-' + getThemeColor() + '-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-' + getThemeColor() + '-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200'"
           >
             <span *ngIf="loading" class="absolute left-0 inset-y-0 flex items-center pl-3">
-              <svg class="animate-spin h-5 w-5 text-green-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg [ngClass]="'animate-spin h-5 w-5 text-' + getThemeColor() + '-300'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
             </span>
-            {{ loading ? 'Creando cuenta...' : 'Crear Cuenta' }}
+            <span class="flex items-center">
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="getCurrentTypeConfig().icon" />
+              </svg>
+              {{ loading ? 'Creando cuenta...' : 'Registrarse como ' + (userType === 'reclutador' ? 'Reclutador' : 'Candidato') }}
+            </span>
           </button>
         </div>
+      </form>
 
-        <!-- Enlace a Login -->
-        <div class="text-center">
+      <!-- Enlace a Login -->
+      <div class="text-center mt-6">
+        <div class="border-t border-gray-200 pt-4">
           <p class="text-sm text-gray-600">
             ¿Ya tienes cuenta?
             <button
               type="button"
               (click)="goToLogin()"
-              class="font-medium text-green-600 hover:text-green-500 transition-colors duration-200"
+              class="font-medium text-indigo-600 hover:text-indigo-500 transition-colors duration-200 ml-1"
             >
-              Inicia sesión aquí
+              Iniciar Sesión
             </button>
           </p>
         </div>
-      </form>
+      </div>
     </div>
   </div>
 </div>

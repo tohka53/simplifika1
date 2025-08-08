@@ -1,7 +1,14 @@
 import { Injectable } from '@angular/core';
 import { SupabaseService } from './supabase.service';
 import { Router } from '@angular/router';
-import { Profile, LoginCredentials, AuthResponse, RegisterData } from '../interfaces/user.interfaces';
+import { 
+  Profile, 
+  LoginCredentials, 
+  AuthResponse, 
+  RegisterData,
+  getUserTypeFromProfile,
+  canAccessAsUserType 
+} from '../interfaces/user.interfaces';
 
 @Injectable({
   providedIn: 'root'
@@ -31,7 +38,7 @@ export class AuthService {
 
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
     try {
-      console.log('Intentando login con:', credentials.username);
+      console.log('Intentando login con:', credentials.username, 'Tipo:', credentials.userType);
       
       // Buscar usuario por username
       const { data: users, error } = await this.supabaseService.client
@@ -69,12 +76,29 @@ export class AuthService {
         created_at: user.created_at
       };
 
+      // 🆕 NUEVA LÓGICA: Validar tipo de acceso si se especificó
+      if (credentials.userType && profileUser.id_perfil) {
+        if (!this.validateUserTypeAccess(profileUser, credentials.userType)) {
+          const userActualType = getUserTypeFromProfile(profileUser.id_perfil);
+          return { 
+            success: false, 
+            message: `Su cuenta es de tipo "${userActualType}". No puede acceder como "${credentials.userType}".` +
+                    (userActualType === 'admin' ? ' Los administradores pueden acceder como cualquier tipo.' : '')
+          };
+        }
+      }
+
       // Guardar usuario
       this.currentUser = profileUser;
       localStorage.setItem('currentUser', JSON.stringify(profileUser));
       
-      console.log('Login exitoso para:', profileUser.username);
-      return { success: true, message: 'Login exitoso', user: profileUser };
+      console.log('Login exitoso para:', profileUser.username, 'Perfil:', profileUser.id_perfil);
+      return { 
+        success: true, 
+        message: 'Login exitoso', 
+        user: profileUser,
+        userType: credentials.userType || getUserTypeFromProfile(profileUser.id_perfil || 2)
+      };
 
     } catch (error) {
       console.error('Error en login:', error);
@@ -84,7 +108,7 @@ export class AuthService {
 
   async register(profile: RegisterData): Promise<AuthResponse> {
     try {
-      console.log('Intentando registrar usuario:', profile.username);
+      console.log('Intentando registrar usuario:', profile.username, 'Tipo:', profile.userType);
 
       // Verificar si el username ya existe
       const { data: existingUser, error: checkError } = await this.supabaseService.client
@@ -103,13 +127,25 @@ export class AuthService {
         return { success: false, message: 'El nombre de usuario ya existe' };
       }
 
-      // Crear nuevo usuario - asignar perfil básico por defecto
+      // 🆕 NUEVA LÓGICA: Determinar perfil basado en userType
+      let finalProfileId = profile.id_perfil;
+      
+      if (!finalProfileId && profile.userType) {
+        // Asignar perfil por defecto según el tipo
+        finalProfileId = profile.userType === 'reclutador' ? 3 : 2; // 3 = Reclutador, 2 = Candidato ✅
+      }
+      
+      if (!finalProfileId) {
+        finalProfileId = 2; // Candidato por defecto ✅
+      }
+
+      // Crear nuevo usuario
       const dataToInsert = {
         username: profile.username,
         full_name: profile.full_name,
         password: profile.password,
         status: 1,
-        id_perfil: profile.id_perfil || 2 // Asignar perfil "Usuario" por defecto
+        id_perfil: finalProfileId
       };
 
       console.log('Datos a insertar:', dataToInsert);
@@ -159,7 +195,7 @@ export class AuthService {
     // Nota: No inyectamos PermissionsService directamente para evitar dependencias circulares
     // El componente que llame a logout debe limpiar los datos de permisos si es necesario
     
-    this.router.navigate(['/langing']);
+    this.router.navigate(['/login']); // 🔧 Corregido: era '/langing'
   }
 
   getCurrentUser(): Profile | null {
@@ -186,4 +222,95 @@ export class AuthService {
   isAdmin(): boolean {
     return this.hasProfile(1); // Asumiendo que perfil 1 es Administrador
   }
-}
+
+  // ===== 🆕 NUEVOS MÉTODOS PARA LOGIN DUAL =====
+
+  /**
+   * Valida si un usuario puede acceder como el tipo especificado
+   */
+  private validateUserTypeAccess(user: Profile, requestedType: 'reclutador' | 'candidato'): boolean {
+    if (!user.id_perfil) {
+      return false;
+    }
+    
+    return canAccessAsUserType(user.id_perfil, requestedType);
+  }
+
+  /**
+   * Obtiene el tipo de usuario actual
+   */
+  getCurrentUserType(): 'reclutador' | 'candidato' | 'admin' | null {
+    const user = this.getCurrentUser();
+    if (!user || !user.id_perfil) {
+      return null;
+    }
+    
+    return getUserTypeFromProfile(user.id_perfil);
+  }
+
+  /**
+   * Verifica si el usuario actual puede acceder como reclutador
+   */
+  canAccessAsRecruiter(): boolean {
+    const user = this.getCurrentUser();
+    if (!user || !user.id_perfil) {
+      return false;
+    }
+    
+    return canAccessAsUserType(user.id_perfil, 'reclutador');
+  }
+
+  /**
+   * Verifica si el usuario actual puede acceder como candidato
+   */
+  canAccessAsCandidate(): boolean {
+    const user = this.getCurrentUser();
+    if (!user || !user.id_perfil) {
+      return false;
+    }
+    
+    return canAccessAsUserType(user.id_perfil, 'candidato');
+  }
+
+  /**
+   * Verifica si el usuario es candidato (perfil 2)
+   */
+  isCandidate(): boolean {
+    return this.hasProfile(2);
+  }
+
+  /**
+   * Verifica si el usuario es reclutador (perfil 3)
+   */
+  isRecruiter(): boolean {
+    return this.hasProfile(3);
+  }
+
+  /**
+   * Obtiene información del perfil del usuario
+   */
+  getUserProfileInfo(): { id: number | null, type: string | null } {
+    const user = this.getCurrentUser();
+    if (!user || !user.id_perfil) {
+      return { id: null, type: null };
+    }
+
+    return {
+      id: user.id_perfil,
+      type: getUserTypeFromProfile(user.id_perfil)
+    };
+  }
+
+  // 🆕 MÉTODO HELPER PARA DEBUG
+  debugUserInfo(): void {
+    const user = this.getCurrentUser();
+    console.log('=== DEBUG USER INFO ===');
+    console.log('Usuario:', user?.username);
+    console.log('Perfil ID:', user?.id_perfil);
+    console.log('Tipo:', this.getCurrentUserType());
+    console.log('Puede acceder como reclutador:', this.canAccessAsRecruiter());
+    console.log('Puede acceder como candidato:', this.canAccessAsCandidate());
+    console.log('Es admin:', this.isAdmin());
+    console.log('======================');
+  }
+}   
