@@ -17,8 +17,6 @@
           <div class="ml-10 flex items-baseline space-x-8">
             <a (click)="scrollToSection('inicio')" class="text-gray-900 hover:text-blue-600 cursor-pointer transition-colors nav-link">Inicio</a>
             <a (click)="scrollToSection('servicios')" class="text-gray-700 hover:text-blue-600 cursor-pointer transition-colors nav-link">Servicios</a>
-            <a (click)="scrollToSection('nosotros')" class="text-gray-700 hover:text-blue-600 cursor-pointer transition-colors nav-link">Nosotros</a>
-            <a (click)="scrollToSection('planes')" class="text-gray-700 hover:text-blue-600 cursor-pointer transition-colors nav-link">Planes</a>
             <a (click)="scrollToSection('contacto')" class="text-gray-700 hover:text-blue-600 cursor-pointer transition-colors nav-link">Contacto</a>
           </div>
         </div>
@@ -58,14 +56,12 @@
             <span class="text-blue-500 gradient-text">Empresa</span>
           </h1>
           <p class="text-xl text-gray-300 mb-8 hero-subtitle">
-            Soluciones informáticas integrales para empresas en Guatemala. Simplificamos tus procesos, optimizamos tu tecnología y aceleramos tu crecimiento digital.
-          </p>
+        Somos una empresa que brinda soluciones ágiles por medio de una herramienta que permitirá sistematizar los 
+          procesos de reclutamiento, selección y contratación de manera eficiente y efectiva. Con Simplifika ayudamos a que 
+          tu empresa evolucione y puedas tener un panorama amplio con mediciones concretas, teniendo KPI´s claros y 
+          visibles.          </p>
           <div class="flex flex-col sm:flex-row gap-4 hero-buttons">
-            <button (click)="requestConsultation(); trackEvent('consultation_request', 'hero', 'primary_cta')" 
-                    class="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center btn-primary">
-              <i class="fas fa-rocket mr-2"></i>
-              Consulta Gratuita
-            </button>
+            
             <button (click)="scrollToSection('servicios')" 
                     class="border border-blue-600 text-blue-500 px-8 py-3 rounded-lg hover:bg-blue-600 hover:text-white transition-colors btn-secondary">
               Ver Servicios
@@ -133,204 +129,9 @@
     </div>
   </section>
 
-  <!-- About Section -->
-  <section id="nosotros" class="py-20 bg-gray-100 section-padding">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-        <div>
-          <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
-            Quiénes Somos
-          </h2>
-          <p class="text-lg text-gray-600 mb-6">
-            Simplifika es una empresa especializada en servicios informáticos ubicada en Guatemala. 
-            Con más de 8 años de experiencia, ayudamos a empresas a digitalizar sus procesos y alcanzar sus objetivos tecnológicos.
-          </p>
-          <div class="space-y-4">
-            <div class="flex items-start">
-              <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center mr-4 mt-1">
-                <i class="fas fa-certificate text-white text-sm"></i>
-              </div>
-              <div>
-                <h4 class="font-semibold text-gray-900">Expertos Certificados</h4>
-                <p class="text-gray-600">Nuestro equipo cuenta con certificaciones internacionales en tecnología</p>
-              </div>
-            </div>
-            <div class="flex items-start">
-              <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center mr-4 mt-1">
-                <i class="fas fa-clock text-white text-sm"></i>
-              </div>
-              <div>
-                <h4 class="font-semibold text-gray-900">Soporte 24/7</h4>
-                <p class="text-gray-600">Brindamos soporte técnico continuo para tu tranquilidad</p>
-              </div>
-            </div>
-            <div class="flex items-start">
-              <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center mr-4 mt-1">
-                <i class="fas fa-shield-alt text-white text-sm"></i>
-              </div>
-              <div>
-                <h4 class="font-semibold text-gray-900">Seguridad Garantizada</h4>
-                <p class="text-gray-600">Implementamos las mejores prácticas de ciberseguridad</p>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="relative">
-          <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600&h=500&fit=crop" 
-               alt="Equipo de trabajo" 
-               class="rounded-2xl shadow-2xl image-overlay">
-          <div class="absolute -bottom-6 -left-6 bg-white rounded-xl p-6 shadow-lg stat-counter">
-            <div class="flex items-center">
-              <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
-                <i class="fas fa-building text-blue-600 text-xl"></i>
-              </div>
-              <div>
-                <p class="text-2xl font-bold text-gray-900">200+</p>
-                <p class="text-sm text-gray-600">Empresas Transformadas</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Team Section -->
-      <div class="mt-20">
-        <h3 class="text-2xl md:text-3xl font-bold text-gray-900 text-center mb-12">
-          Nuestro Equipo
-        </h3>
-        
-        <div class="flex justify-center">
-          <div [ngClass]="getTeamGridClasses()" class="gap-8 max-w-6xl">
-            <div *ngFor="let member of team; let i = index" 
-                 class="bg-white rounded-xl p-8 shadow-lg hover:shadow-xl transition-shadow border border-gray-200 hover:border-blue-200 team-card card-hover-effect"
-                 [style.animation-delay.ms]="(i + 1) * 300">
-              <div class="text-center">
-                <img [src]="member.image" 
-                     [alt]="member.name" 
-                     class="w-32 h-32 rounded-full mx-auto mb-6 object-cover border-4 border-blue-100 team-avatar">
-                <h4 class="text-2xl font-semibold text-gray-900 mb-2">{{ member.name }}</h4>
-                <p class="text-blue-600 font-medium text-lg mb-3">{{ member.role }}</p>
-                <p class="text-gray-600 mb-2">{{ member.specialization }}</p>
-                <p class="text-gray-500 text-sm bg-gray-50 px-4 py-2 rounded-full inline-block team-experience-badge">
-                  {{ member.experience }}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Certifications Section -->
-      <div class="mt-20">
-        <h3 class="text-2xl font-bold text-gray-900 text-center mb-8">
-          Nuestras Certificaciones
-        </h3>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-          <div *ngFor="let cert of getCertifications()" class="text-center p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
-            <img [src]="cert.image" [alt]="cert.name" class="h-12 mx-auto mb-2 object-contain">
-            <p class="text-sm font-medium text-gray-900">{{ cert.name }}</p>
-            <p class="text-xs text-gray-500">{{ cert.description }}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
+ 
 
-  <!-- Pricing Section -->
-  <section id="planes" class="py-20 bg-white section-padding">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-16">
-        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-          Nuestros Planes
-        </h2>
-        <p class="text-xl text-gray-600 max-w-2xl mx-auto">
-          Soluciones escalables para empresas de todos los tamaños. Invierte en el futuro digital de tu empresa.
-        </p>
-      </div>
-      
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div *ngFor="let plan of pricingPlans; let i = index" 
-             [class]="'relative bg-white rounded-2xl shadow-lg border pricing-card card-hover-effect ' + (plan.popular ? 'border-blue-500 ring-2 ring-blue-500' : 'border-gray-200')"
-             [style.animation-delay.ms]="i * 200">
-          
-          <div *ngIf="plan.popular" class="absolute -top-4 left-1/2 transform -translate-x-1/2">
-            <span class="bg-blue-600 text-white px-4 py-1 rounded-full text-sm font-medium">
-              Más Popular
-            </span>
-          </div>
-          
-          <div class="p-8">
-            <div class="text-center">
-              <h3 class="text-2xl font-bold text-gray-900 mb-4">{{ plan.name }}</h3>
-              <div class="mb-6">
-                <span class="text-4xl font-bold text-blue-600">{{ plan.price }}</span>
-                <span class="text-gray-600 ml-2">{{ plan.period }}</span>
-              </div>
-              
-              <ul class="space-y-3 mb-8">
-                <li *ngFor="let feature of plan.features" class="flex items-start">
-                  <i class="fas fa-check text-blue-600 mr-3 mt-1"></i>
-                  <span class="text-gray-700">{{ feature }}</span>
-                </li>
-              </ul>
-              
-              <button (click)="selectPlan(plan); trackEvent('plan_selection', 'pricing', plan.name)" 
-                      [class]="'w-full py-3 px-6 rounded-lg font-medium transition-colors ' + 
-                               (plan.popular ? 'bg-blue-600 text-white hover:bg-blue-700 btn-primary' : 'bg-gray-100 text-gray-900 hover:bg-gray-200')">
-                {{ plan.buttonText }}
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="text-center mt-12">
-        <p class="text-gray-600 mb-4">
-          ¿Necesitas una solución personalizada?
-        </p>
-        <button (click)="contactUs(); trackEvent('custom_solution_request', 'pricing')" 
-                class="text-blue-600 hover:text-blue-800 font-medium transition-colors">
-          Contáctanos para una consulta gratuita →
-        </button>
-      </div>
-    </div>
-  </section>
 
-  <!-- Testimonials Section -->
-  <section class="py-20 bg-gray-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-16">
-        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-          Lo que dicen nuestros clientes
-        </h2>
-        <p class="text-xl text-gray-600 max-w-2xl mx-auto">
-          Casos de éxito que demuestran el impacto de nuestras soluciones
-        </p>
-      </div>
-      
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div *ngFor="let testimonial of getFilteredTestimonials(); let i = index" 
-             class="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow border border-gray-200 card-hover-effect"
-             [style.animation-delay.ms]="i * 250">
-          <div class="flex items-center mb-4">
-            <img [src]="testimonial.image" 
-                 [alt]="testimonial.name" 
-                 class="w-12 h-12 rounded-full object-cover mr-4">
-            <div>
-              <h4 class="font-semibold text-gray-900">{{ testimonial.name }}</h4>
-              <p class="text-sm text-gray-600">{{ testimonial.position }}</p>
-              <p class="text-sm text-blue-600">{{ testimonial.company }}</p>
-            </div>
-          </div>
-          <p class="text-gray-700 mb-4">"{{ testimonial.testimonial }}"</p>
-          <div class="flex text-yellow-400">
-            <i *ngFor="let star of [].constructor(testimonial.rating)" class="fas fa-star"></i>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
 
   <!-- Contact Section -->
   <section id="contacto" class="py-20 bg-gray-100 section-padding">
@@ -425,15 +226,7 @@
               Programar Demostración
             </button>
             
-            <div *ngIf="getNextWebinar()" class="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
-              <h5 class="font-semibold text-gray-900 mb-2">Próximo Webinar Gratuito</h5>
-              <p class="text-sm text-gray-600 mb-2">{{ getNextWebinar().title }}</p>
-              <p class="text-xs text-gray-500 mb-3">{{ getNextWebinar().date }} a las {{ getNextWebinar().time }}</p>
-              <button (click)="registerWebinar()" 
-                      class="text-blue-600 hover:text-blue-800 font-medium text-sm">
-                Registrarse gratis →
-              </button>
-            </div>
+            
           </div>
         </div>
         
@@ -548,25 +341,7 @@
         </div>
       </div>
       
-      <!-- FAQ Section -->
-      <div class="mt-20">
-        <h3 class="text-2xl font-bold text-gray-900 text-center mb-12">
-          Preguntas Frecuentes
-        </h3>
-        <div class="max-w-3xl mx-auto space-y-4">
-          <div *ngFor="let faq of getFAQs(); let i = index" 
-               class="bg-white rounded-lg shadow-sm border border-gray-200">
-            <button (click)="toggleFAQ(i)" 
-                    class="w-full px-6 py-4 text-left flex justify-between items-center hover:bg-gray-50 transition-colors">
-              <span class="font-medium text-gray-900">{{ faq.question }}</span>
-              <i [class]="'fas ' + (faq.isOpen ? 'fa-chevron-up' : 'fa-chevron-down') + ' text-gray-400'"></i>
-            </button>
-            <div *ngIf="faq.isOpen" class="px-6 pb-4">
-              <p class="text-gray-600">{{ faq.answer }}</p>
-            </div>
-          </div>
-        </div>
-      </div>
+     
     </div>
   </section>
 
@@ -618,12 +393,8 @@
           <h4 class="font-semibold mb-4">Enlaces</h4>
           <ul class="space-y-2 text-gray-400">
             <li><a (click)="scrollToSection('inicio')" class="hover:text-blue-400 transition-colors cursor-pointer footer-link">Inicio</a></li>
-            <li><a (click)="scrollToSection('nosotros')" class="hover:text-blue-400 transition-colors cursor-pointer footer-link">Nosotros</a></li>
-            <li><a (click)="scrollToSection('planes')" class="hover:text-blue-400 transition-colors cursor-pointer footer-link">Planes</a></li>
             <li><a (click)="scrollToSection('contacto')" class="hover:text-blue-400 transition-colors cursor-pointer footer-link">Contacto</a></li>
-            <li><a href="#" class="hover:text-blue-400 transition-colors footer-link">Blog</a></li>
-            <li><a href="#" class="hover:text-blue-400 transition-colors footer-link">Casos de Éxito</a></li>
-          </ul>
+                </ul>
         </div>
         
         <div>

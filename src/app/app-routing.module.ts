@@ -128,7 +128,18 @@ const routes: Routes = [
               profiles: [1, 3],
               mode: 'view'
             }
-          }
+          },
+
+          {
+            path: 'revisar-candidatos',
+            component: RevisarCandidatosComponent,
+            canActivate: [RoleGuard],
+            data: {
+              title: 'Revisar Candidatos',
+              description: 'Gestiona las aplicaciones recibidas',
+              profiles: [1, 3] // Solo Admin y Supervisor/RRHH
+            }
+          },
         ]
       },
 
@@ -253,7 +264,17 @@ const routes: Routes = [
               title: 'Empleos por Empresa',
               mode: 'company'
             }
-          }
+          },
+          {
+            path: 'revisar-candidatos1',
+            component: RevisarCandidatosComponent,
+            canActivate: [RoleGuard],
+            data: {
+              title: 'Revisar Candidatos',
+              description: 'Gestiona las aplicaciones recibidas',
+              profiles: [1, 3] // Solo Admin y Supervisor/RRHH
+            }
+          },
         ]
       },
 
