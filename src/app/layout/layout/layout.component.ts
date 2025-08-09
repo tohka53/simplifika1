@@ -1,5 +1,5 @@
 // src/app/shared/layout/layout.component.ts
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
@@ -18,6 +18,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
   currentUser: Profile | null = null;
   menuItems: MenuModule[] = [];
   isSidebarCollapsed = false;
+  isMobileMenuOpen = false;
   currentRoute = '';
   expandedModules: Set<number> = new Set();
   loading = false;
@@ -39,8 +40,19 @@ export class LayoutComponent implements OnInit, OnDestroy {
     private router: Router
   ) {}
 
+  // Escuchar cambios de tamaño de ventana para cerrar menú móvil
+  @HostListener('window:resize', ['$event'])
+  onResize(event: any) {
+    if (event.target.innerWidth > 768 && this.isMobileMenuOpen) {
+      this.isMobileMenuOpen = false;
+    }
+  }
+
   async ngOnInit(): Promise<void> {
     console.log('Layout inicializado');
+    
+    // Verificar si estamos en móvil al cargar
+    this.checkMobileView();
     
     // Obtener usuario actual
     this.currentUser = this.authService.getCurrentUser();
@@ -63,6 +75,10 @@ export class LayoutComponent implements OnInit, OnDestroy {
         .pipe(filter(event => event instanceof NavigationEnd))
         .subscribe((event: NavigationEnd) => {
           this.currentRoute = event.urlAfterRedirects;
+          // Cerrar menú móvil al navegar
+          if (this.isMobileMenuOpen) {
+            this.isMobileMenuOpen = false;
+          }
           console.log('Ruta actual en layout:', this.currentRoute);
         })
     );
@@ -73,6 +89,13 @@ export class LayoutComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
+  }
+
+  private checkMobileView(): void {
+    // Auto-colapsar en móviles
+    if (window.innerWidth <= 768) {
+      this.isSidebarCollapsed = true;
+    }
   }
 
   async loadUserMenu(): Promise<void> {
@@ -115,30 +138,132 @@ export class LayoutComponent implements OnInit, OnDestroy {
         icono: 'fas fa-users',
         ruta: '/usuarios',
         orden: 2,
-        es_padre: false,
+        es_padre: true,
         modulo_padre_id: null,
         permisos: ['view'],
-        expanded: false
+        expanded: false,
+        children: [
+          {
+            id_modulo: 6,
+            nombre: 'Lista de Usuarios',
+            descripcion: 'Ver todos los usuarios',
+            icono: 'fas fa-list',
+            ruta: '/usuarios/lista',
+            orden: 1,
+            es_padre: false,
+            modulo_padre_id: 2,
+            permisos: ['view'],
+            expanded: false
+          },
+          {
+            id_modulo: 7,
+            nombre: 'Crear Usuario',
+            descripcion: 'Crear nuevo usuario',
+            icono: 'fas fa-user-plus',
+            ruta: '/usuarios/crear',
+            orden: 2,
+            es_padre: false,
+            modulo_padre_id: 2,
+            permisos: ['create'],
+            expanded: false
+          }
+        ]
       },
       {
         id_modulo: 3,
+        nombre: 'Gestión CV',
+        descripcion: 'Gestión de currículums',
+        icono: 'fas fa-file-alt',
+        ruta: '/cv',
+        orden: 3,
+        es_padre: true,
+        modulo_padre_id: null,
+        permisos: ['view'],
+        expanded: false,
+        children: [
+          {
+            id_modulo: 8,
+            nombre: 'Mis CVs',
+            descripcion: 'Ver mis currículums',
+            icono: 'fas fa-eye',
+            ruta: '/cv/lista',
+            orden: 1,
+            es_padre: false,
+            modulo_padre_id: 3,
+            permisos: ['view'],
+            expanded: false
+          },
+          {
+            id_modulo: 9,
+            nombre: 'Crear CV',
+            descripcion: 'Crear nuevo currículum',
+            icono: 'fas fa-plus',
+            ruta: '/cv/crear',
+            orden: 2,
+            es_padre: false,
+            modulo_padre_id: 3,
+            permisos: ['create'],
+            expanded: false
+          }
+        ]
+      },
+      {
+        id_modulo: 4,
+        nombre: 'Postulaciones',
+        descripcion: 'Gestión de aplicaciones',
+        icono: 'fas fa-briefcase',
+        ruta: '/postulaciones',
+        orden: 4,
+        es_padre: true,
+        modulo_padre_id: null,
+        permisos: ['view'],
+        expanded: false,
+        children: [
+          {
+            id_modulo: 10,
+            nombre: 'Mis Aplicaciones',
+            descripcion: 'Ver mis postulaciones',
+            icono: 'fas fa-paper-plane',
+            ruta: '/postulaciones/mis-aplicaciones',
+            orden: 1,
+            es_padre: false,
+            modulo_padre_id: 4,
+            permisos: ['view'],
+            expanded: false
+          },
+          {
+            id_modulo: 11,
+            nombre: 'Buscar Empleos',
+            descripcion: 'Buscar ofertas laborales',
+            icono: 'fas fa-search',
+            ruta: '/postulaciones/buscar-empleos',
+            orden: 2,
+            es_padre: false,
+            modulo_padre_id: 4,
+            permisos: ['view'],
+            expanded: false
+          }
+        ]
+      },
+      {
+        id_modulo: 5,
         nombre: 'Reportes',
         descripcion: 'Sistema de reportes',
         icono: 'fas fa-chart-bar',
         ruta: '/reportes',
-        orden: 3,
+        orden: 5,
         es_padre: false,
         modulo_padre_id: null,
         permisos: ['view'],
         expanded: false
       },
       {
-        id_modulo: 4,
+        id_modulo: 6,
         nombre: 'Configuración',
         descripcion: 'Configuración del sistema',
         icono: 'fas fa-cog',
         ruta: '/configuracion',
-        orden: 4,
+        orden: 6,
         es_padre: false,
         modulo_padre_id: null,
         permisos: ['view'],
@@ -173,11 +298,32 @@ export class LayoutComponent implements OnInit, OnDestroy {
   }
 
   toggleSidebar(): void {
+    // En móvil, no permitir colapsar/expandir, solo abrir/cerrar
+    if (window.innerWidth <= 768) {
+      this.toggleSidebarMobile();
+      return;
+    }
+    
     this.isSidebarCollapsed = !this.isSidebarCollapsed;
     console.log('Sidebar colapsado:', this.isSidebarCollapsed);
+    
+    // Cerrar todos los módulos expandidos cuando se colapsa
+    if (this.isSidebarCollapsed) {
+      this.expandedModules.clear();
+    }
+  }
+
+  toggleSidebarMobile(): void {
+    this.isMobileMenuOpen = !this.isMobileMenuOpen;
+    console.log('Menú móvil abierto:', this.isMobileMenuOpen);
   }
 
   toggleModule(moduleId: number): void {
+    // No permitir expandir módulos si el sidebar está colapsado
+    if (this.isSidebarCollapsed) {
+      return;
+    }
+
     if (this.expandedModules.has(moduleId)) {
       this.expandedModules.delete(moduleId);
     } else {
@@ -246,17 +392,50 @@ export class LayoutComponent implements OnInit, OnDestroy {
     this.currentUser = null;
     this.menuItems = [];
     this.expandedModules.clear();
+    this.isSidebarCollapsed = false;
+    this.isMobileMenuOpen = false;
     this.authService.logout();
   }
 
   getPageTitle(): string {
-    switch (this.currentRoute) {
-      case '/dashboard': return 'Dashboard';
-      case '/usuarios': return 'Gestión de Usuarios';
-      case '/reportes': return 'Reportes';
-      case '/configuracion': return 'Configuración';
-      default: return 'Sistema de Gestión';
+    const routeTitleMap: { [key: string]: string } = {
+      '/dashboard': 'Dashboard',
+      '/usuarios': 'Gestión de Usuarios',
+      '/usuarios/lista': 'Lista de Usuarios',
+      '/usuarios/crear': 'Crear Usuario',
+      '/cv': 'Gestión de CV',
+      '/cv/lista': 'Mis CVs',
+      '/cv/crear': 'Crear CV',
+      '/cv/editar': 'Editar CV',
+      '/cv/ver': 'Ver CV',
+      '/postulaciones': 'Postulaciones',
+      '/postulaciones/mis-aplicaciones': 'Mis Aplicaciones',
+      '/postulaciones/buscar-empleos': 'Buscar Empleos',
+      '/postulaciones/revisar-candidatos': 'Revisar Candidatos',
+      '/postulaciones/entrevistas': 'Entrevistas',
+      '/empresas': 'Gestión de Empresas',
+      '/empresas/crear': 'Crear Empresa',
+      '/empresas/editar': 'Editar Empresa',
+      '/empleos': 'Gestión de Empleos',
+      '/empleos/crear': 'Crear Empleo',
+      '/empleos/editar': 'Editar Empleo',
+      '/reportes': 'Reportes',
+      '/configuracion': 'Configuración'
+    };
+
+    // Buscar coincidencia exacta primero
+    if (routeTitleMap[this.currentRoute]) {
+      return routeTitleMap[this.currentRoute];
     }
+
+    // Buscar coincidencia parcial para rutas dinámicas
+    for (const route in routeTitleMap) {
+      if (this.currentRoute.startsWith(route)) {
+        return routeTitleMap[route];
+      }
+    }
+
+    return 'Sistema de Gestión';
   }
 
   // Verificar si estamos en dashboard para mostrar las estadísticas
@@ -290,5 +469,18 @@ export class LayoutComponent implements OnInit, OnDestroy {
     } finally {
       this.loading = false;
     }
+  }
+
+  // Método para verificar si el dispositivo es móvil
+  isMobile(): boolean {
+    return window.innerWidth <= 768;
+  }
+
+  // Método para obtener el estado actual del sidebar
+  getSidebarState(): string {
+    if (this.isMobile()) {
+      return this.isMobileMenuOpen ? 'mobile-open' : 'mobile-closed';
+    }
+    return this.isSidebarCollapsed ? 'collapsed' : 'expanded';
   }
 }
