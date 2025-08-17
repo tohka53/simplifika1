@@ -20,15 +20,15 @@
       },
       {
         icon: 'fas fa-cloud',
-        title: 'Infraestructura Cloud',
-        description: 'Migración y gestión de servicios en la nube para mayor escalabilidad y eficiencia.',
-        features: ['Migración a la nube', 'AWS/Azure/GCP', 'Backup automático', 'Monitoreo 24/7']
+        title: 'Herramienta para automatización ',
+        description: 'Herramienta para automatizar procesos de negocio y mejorar la eficiencia operativa, reduciendo costos.',
+        features: ['Automatización de procesos', 'Integración con sistemas existentes', 'Interfaz intuitiva', 'Reportes y análisis']
       },
       {
         icon: 'fas fa-shield-alt',
-        title: 'Ciberseguridad',
-        description: 'Protección integral de tus datos y sistemas contra amenazas digitales.',
-        features: ['Auditorías de seguridad', 'Firewall avanzado', 'Antivirus empresarial', 'Capacitación personal']
+        title: 'Reclutamiento y Selección',
+        description: 'Ssistemas de reclutamiento y selección para encontrar el talento ideal para tu empresa.',
+        features: ['Capacitación personal', 'Evaluación de habilidades', 'Entrevistas personalizadas', 'Onboarding efectivo']
       },
       {
         icon: 'fas fa-chart-line',
@@ -38,6 +38,7 @@
       }
     ];
 
+    
     // Datos para la sección de planes
     pricingPlans = [
       {
@@ -150,6 +151,32 @@
         icon: 'fab fa-facebook-f'
       }
     ];
+
+
+
+    // Datos para la sección de beneficios (Por qué nosotros?)
+  benefits = [
+    {
+      icon: 'fas fa-dollar-sign',
+      title: 'Beneficios para la empresa',
+      description: 'Optimización de costos de capital humano y operativo',
+      features: ['Reducción de costos de reclutamiento', 'Optimización de tiempo', 'Mejora en la toma de decisiones', 'ROI medible']
+    },
+    {
+      icon: 'fas fa-search',
+      title: 'Beneficios para el colaborador',
+      description: 'Procesos ágiles y transparentes para candidatos',
+      features: ['Aplicación sencilla', 'Seguimiento en tiempo real', 'Comunicación clara', 'Experiencia mejorada']
+    },
+    {
+      icon: 'fas fa-chart-bar',
+      title: 'Beneficio para el equipo',
+      description: 'Resultados enfocados en los objetivos de la empresa',
+      features: ['KPIs claros y visibles', 'Reportes automatizados', 'Métricas concretas', 'Análisis de rendimiento']
+    }
+  ];
+
+  
 
     constructor(private router: Router) {}
 
@@ -626,6 +653,9 @@
         registrationUrl: '#contacto'
       };
     }
+
+
+    
 
     // Método para registrarse al webinar
     registerWebinar(): void {

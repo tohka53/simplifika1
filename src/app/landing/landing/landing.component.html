@@ -84,6 +84,69 @@
     </div>
   </section>
 
+
+
+
+  <!-- Benefits Section (¿Por qué nosotros?) -->
+  <section id="beneficios" class="py-20 bg-blue-50 section-padding">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4 section-title">
+          ¿Por qué Simplifika?
+        </h2>
+        <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+          Nuestra plataforma de gestión de talento humano brinda beneficios tangibles para todos los involucrados en el proceso
+        </p>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div *ngFor="let benefit of benefits; let i = index" 
+             class="bg-white rounded-xl p-8 hover:shadow-xl transition-all duration-300 hover:border-blue-200 border border-transparent benefit-card card-hover-effect"
+             [style.animation-delay.ms]="i * 200">
+          <div class="text-center">
+            <div class="w-20 h-20 bg-gradient-to-br from-blue-600 to-blue-700 rounded-full flex items-center justify-center mx-auto mb-6 benefit-icon shadow-lg">
+              <i [class]="benefit.icon + ' text-white text-3xl'"></i>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 mb-4">{{ benefit.title }}</h3>
+            <p class="text-gray-600 mb-6 leading-relaxed">{{ benefit.description }}</p>
+            <ul class="text-sm text-gray-500 space-y-2">
+              <li *ngFor="let feature of benefit.features" class="flex items-center justify-start">
+                <i class="fas fa-check-circle text-blue-600 mr-3 flex-shrink-0"></i>
+                <span>{{ feature }}</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Key Metrics Section -->
+      <div class="mt-16 bg-white rounded-2xl shadow-lg p-8">
+        <h3 class="text-2xl font-bold text-gray-900 text-center mb-8">Resultados que hablan por sí solos</h3>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div class="text-center">
+            <div class="text-3xl font-bold text-blue-600 mb-2">70%</div>
+            <div class="text-gray-600">Reducción en tiempo de contratación</div>
+          </div>
+          <div class="text-center">
+            <div class="text-3xl font-bold text-blue-600 mb-2">50%</div>
+            <div class="text-gray-600">Disminución de costos operativos</div>
+          </div>
+          <div class="text-center">
+            <div class="text-3xl font-bold text-blue-600 mb-2">90%</div>
+            <div class="text-gray-600">Satisfacción de candidatos</div>
+          </div>
+          <div class="text-center">
+            <div class="text-3xl font-bold text-blue-600 mb-2">24/7</div>
+            <div class="text-gray-600">Disponibilidad del sistema</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+
+  
   <!-- Services Section -->
   <section id="servicios" class="py-20 bg-white section-padding">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
