@@ -1,0 +1,431 @@
+/* Estilos CSS específicos para modales que evitan superposición con sidebar */
+
+/* ===== ESTILOS BASE PARA MODALES ===== */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 2000;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 2rem;
+  overflow-y: auto;
+}
+
+/* ===== CONTENEDOR DEL MODAL CON AJUSTE AL SIDEBAR ===== */
+.modal-container {
+  position: relative;
+  z-index: 2010;
+  margin: 0 auto;
+  padding: 0 1rem;
+  width: 100%;
+  transition: all 0.3s ease-in-out;
+}
+
+/* Ajustes para desktop cuando sidebar está expandido */
+@media (min-width: 769px) {
+  .modal-container.sidebar-expanded {
+    margin-left: 16rem; /* 256px - ancho del sidebar expandido */
+    width: calc(100vw - 16rem);
+    max-width: calc(100vw - 18rem); /* Dejar 2rem de padding */
+  }
+  
+  .modal-container.sidebar-collapsed {
+    margin-left: 4rem; /* 64px - ancho del sidebar colapsado */
+    width: calc(100vw - 4rem);
+    max-width: calc(100vw - 6rem); /* Dejar 2rem de padding */
+  }
+}
+
+/* En móvil, usar todo el ancho disponible */
+@media (max-width: 768px) {
+  .modal-container {
+    margin-left: 0 !important;
+    width: 100% !important;
+    max-width: calc(100vw - 2rem) !important;
+  }
+}
+
+/* ===== CONTENIDO DEL MODAL ===== */
+.modal-content {
+  background: white;
+  border-radius: 0.75rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  width: 100%;
+  max-height: calc(100vh - 4rem);
+  overflow-y: auto;
+  position: relative;
+}
+
+/* ===== TAMAÑOS DE MODAL ===== */
+.modal-sm .modal-content {
+  max-width: 28rem; /* 448px */
+}
+
+.modal-md .modal-content {
+  max-width: 32rem; /* 512px */
+}
+
+.modal-lg .modal-content {
+  max-width: 48rem; /* 768px */
+}
+
+.modal-xl .modal-content {
+  max-width: 64rem; /* 1024px */
+}
+
+.modal-full .modal-content {
+  max-width: 90%;
+  width: 90%;
+}
+
+/* ===== ESTILOS PARA EL HEADER STICKY ===== */
+.modal-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 1.5rem;
+  border-radius: 0.75rem 0.75rem 0 0;
+}
+
+.modal-body {
+  padding: 1.5rem;
+  max-height: calc(100vh - 12rem);
+  overflow-y: auto;
+}
+
+.modal-footer {
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  background: white;
+  border-top: 1px solid #e5e7eb;
+  padding: 1rem 1.5rem;
+  border-radius: 0 0 0.75rem 0.75rem;
+}
+
+/* ===== SCROLL PERSONALIZADO PARA MODALES ===== */
+.modal-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+  background: #f3f4f6;
+  border-radius: 3px;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* ===== ANIMACIONES DE ENTRADA ===== */
+.modal-overlay.show {
+  animation: modalFadeIn 0.3s ease-out;
+}
+
+.modal-content.show {
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ===== RESPONSIVE DESIGN ESPECÍFICO ===== */
+@media (max-width: 640px) {
+  .modal-container {
+    padding: 0.5rem !important;
+  }
+  
+  .modal-content {
+    max-height: calc(100vh - 2rem);
+    border-radius: 0.5rem;
+  }
+  
+  .modal-header,
+  .modal-body,
+  .modal-footer {
+    padding: 1rem;
+  }
+  
+  .modal-body {
+    max-height: calc(100vh - 8rem);
+  }
+  
+  /* En móvil muy pequeño, hacer modales más compactos */
+  .modal-xl .modal-content,
+  .modal-lg .modal-content {
+    max-width: 95%;
+  }
+}
+
+/* ===== ESTILOS PARA CARDS DENTRO DE MODALES ===== */
+.modal-card {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.modal-card:last-child {
+  margin-bottom: 0;
+}
+
+.modal-card-header {
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+}
+
+.modal-card-header i {
+  margin-right: 0.5rem;
+  color: #6b7280;
+}
+
+/* ===== UTILIDADES ESPECÍFICAS PARA EL MODAL DE CV ===== */
+.cv-section {
+  border-left: 4px solid #3b82f6;
+  padding-left: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.cv-section:last-child {
+  margin-bottom: 0;
+}
+
+.cv-section.education {
+  border-left-color: #10b981;
+}
+
+.cv-section.experience {
+  border-left-color: #8b5cf6;
+}
+
+.cv-section.languages {
+  border-left-color: #f59e0b;
+}
+
+.cv-section.courses {
+  border-left-color: #ef4444;
+}
+
+/* ===== GRID RESPONSIVO PARA CONTENIDO DE CV ===== */
+.cv-grid {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 1.5rem;
+}
+
+@media (max-width: 1024px) {
+  .cv-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
+/* ===== ESTILOS PARA ESTADOS Y BADGES ===== */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.status-badge.pendiente {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.status-badge.revisado {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.status-badge.preseleccionado {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.status-badge.entrevista {
+  background-color: #e0e7ff;
+  color: #5b21b6;
+}
+
+.status-badge.contratado {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.status-badge.rechazado {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+/* ===== ESTILOS PARA RATING/PUNTUACIÓN ===== */
+.rating-stars {
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+}
+
+.rating-stars .star {
+  font-size: 0.875rem;
+}
+
+.rating-stars .star.filled {
+  color: #fbbf24;
+}
+
+.rating-stars .star.empty {
+  color: #d1d5db;
+}
+
+/* ===== BOTONES MEJORADOS ===== */
+.modal-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease-in-out;
+  border: none;
+  cursor: pointer;
+}
+
+.modal-btn i {
+  margin-right: 0.5rem;
+}
+
+.modal-btn-primary {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.modal-btn-primary:hover {
+  background-color: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
+}
+
+.modal-btn-secondary {
+  background-color: #6b7280;
+  color: white;
+}
+
+.modal-btn-secondary:hover {
+  background-color: #4b5563;
+}
+
+.modal-btn-success {
+  background-color: #10b981;
+  color: white;
+}
+
+.modal-btn-success:hover {
+  background-color: #059669;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3);
+}
+
+.modal-btn-outline {
+  background-color: transparent;
+  border: 1px solid #d1d5db;
+  color: #374151;
+}
+
+.modal-btn-outline:hover {
+  background-color: #f9fafb;
+  border-color: #9ca3af;
+}
+
+/* ===== MEJORAS DE ACCESIBILIDAD ===== */
+.modal-overlay:focus-within {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.modal-btn:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* ===== UTILIDADES PARA TEXTO ===== */
+.text-truncate-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.text-truncate-3 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+/* ===== SEPARADORES ===== */
+.modal-divider {
+  height: 1px;
+  background-color: #e5e7eb;
+  margin: 1.5rem 0;
+}
+
+/* ===== LOADING STATES ===== */
+.modal-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+}
+
+.modal-spinner {
+  width: 2rem;
+  height: 2rem;
+  border: 2px solid #e5e7eb;
+  border-top: 2px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

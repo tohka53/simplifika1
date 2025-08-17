@@ -20,6 +20,11 @@ import { BuscarEmpleosComponent } from './buscar-empleos/buscar-empleos/buscar-e
 import { MisAplicacionesComponent } from './mis-aplicaciones/mis-aplicaciones/mis-aplicaciones.component';
 import { RevisarCandidatosComponent } from './revisar-candidatos/revisar-candidatos/revisar-candidatos.component';
 import { PostulacionesService } from './services/postulaciones.service';
+import { JobService } from './services/job.service';
+import { AuthService } from './services/auth.service';
+import { PermissionsService } from './services/permissions.service';
+
+
 @NgModule({
   declarations: [
     AppComponent,

@@ -1,6 +1,6 @@
-/* src/app/shared/layout/layout.component.css */
+/* src/app/shared/layout/layout.component.css - VERSIÓN CORREGIDA */
 
-/* Estilos para el layout principal */
+/* ===== ESTILOS PARA EL LAYOUT PRINCIPAL ===== */
 .layout-container {
   min-height: 100vh;
   background-color: #f9fafb;
@@ -12,7 +12,7 @@
   top: 0;
   left: 0;
   height: 100vh;
-  z-index: 1000;
+  z-index: 1000; /* z-index menor que modals */
   background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
   transition: width 0.3s ease-in-out;
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
@@ -34,7 +34,7 @@
   .sidebar {
     width: 16rem !important; /* Siempre expandido en móvil */
     transform: translateX(-100%);
-    z-index: 1050;
+    z-index: 1050; /* Mayor que desktop pero menor que modals */
     transition: transform 0.3s ease-in-out;
   }
 
@@ -79,7 +79,6 @@
   padding-bottom: 1rem;
   scrollbar-width: thin;
   scrollbar-color: #4B5563 #1F2937;
-  /* Asegurar que tome el espacio restante */
   height: 0;
   min-height: 0;
 }
@@ -104,14 +103,14 @@
 
 /* ===== HEADER DEL SIDEBAR ===== */
 .sidebar-header {
-  height: 72px; /* Altura fija para el header */
+  height: 72px;
   border-bottom: 1px solid #374151;
   flex-shrink: 0;
 }
 
 /* ===== USER SECTION FIJO ===== */
 .user-section {
-  height: 80px; /* Altura fija para el footer */
+  height: 80px;
   background: rgba(17, 24, 39, 0.95);
   backdrop-filter: blur(10px);
   border-top: 1px solid rgba(75, 85, 99, 0.3);
@@ -145,7 +144,7 @@
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: 100; /* Menor que sidebar y modals */
   flex-shrink: 0;
 }
 
@@ -157,31 +156,12 @@
   min-height: 0;
 }
 
-/* ===== ANIMACIONES Y TRANSICIONES ===== */
-.sidebar-toggle-btn {
-  transition: all 0.2s ease-in-out;
-}
-
-.sidebar-toggle-btn:hover {
-  background-color: rgba(55, 65, 81, 0.8);
-  transform: scale(1.05);
-}
-
-.user-avatar {
-  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-  transition: transform 0.2s ease-in-out;
-}
-
-.user-avatar:hover {
-  transform: scale(1.05);
-}
-
 /* ===== OVERLAY PARA MÓVILES ===== */
 .sidebar-overlay {
   position: fixed;
   inset: 0;
   background-color: rgba(0, 0, 0, 0.5);
-  z-index: 1040;
+  z-index: 1040; /* Menor que sidebar móvil pero mayor que contenido */
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
@@ -192,28 +172,46 @@
   visibility: visible;
 }
 
-/* ===== RESPONSIVE DESIGN ===== */
-@media (max-width: 768px) {
-  .main-header {
-    padding-left: 1rem;
-  }
+/* ===== ESTILOS ESPECÍFICOS PARA MODALS ===== */
+/* Estos estilos aseguran que los modals siempre estén por encima del sidebar */
 
-  .mobile-menu-btn {
-    display: block;
-  }
-
-  .sidebar-header {
-    height: 64px;
-  }
-
-  .user-section {
-    height: 72px;
-  }
+/* Modal overlay base - el z-index más alto */
+.modal-overlay, 
+.fixed.inset-0.bg-gray-600.bg-opacity-50,
+.fixed.inset-0.bg-black.bg-opacity-50 {
+  z-index: 2000 !important; /* z-index más alto que todo */
 }
 
+/* Modal container */
+.modal-container,
+.relative.top-4.mx-auto,
+.relative.top-10.mx-auto {
+  z-index: 2010 !important; /* Asegurar que esté por encima del overlay */
+}
+
+/* Modal de aplicaciones específico */
+div[class*="fixed inset-0 bg-gray-600 bg-opacity-50"] {
+  z-index: 2000 !important;
+}
+
+div[class*="relative top-"] {
+  z-index: 2010 !important;
+}
+
+/* Ajustes específicos para modals en desktop cuando el sidebar está expandido */
 @media (min-width: 769px) {
-  .mobile-menu-btn {
-    display: none;
+  .modal-desktop-adjust {
+    /* Para modals que necesiten ajustarse al sidebar */
+    margin-left: 0 !important; /* Reset cualquier margin */
+    width: 100vw !important; /* Usar todo el ancho de viewport */
+    left: 0 !important; /* Posicionar desde el borde izquierdo */
+  }
+  
+  .modal-desktop-adjust .modal-content {
+    /* El contenido interno sí puede tener márgenes */
+    margin-left: auto;
+    margin-right: auto;
+    max-width: calc(100vw - 2rem); /* Dejar espacio en los bordes */
   }
 }
 
@@ -272,209 +270,157 @@
 }
 
 @keyframes tooltipFadeIn {
-  from {
-    opacity: 0;
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ===== RESPONSIVE DESIGN MEJORADO ===== */
+@media (max-width: 768px) {
+  /* En móvil, asegurar que modals usen todo el ancho */
+  .modal-overlay {
+    z-index: 2000 !important;
   }
-  to {
-    opacity: 1;
+  
+  .modal-container {
+    z-index: 2010 !important;
+    margin: 1rem !important;
+    width: calc(100vw - 2rem) !important;
+    max-width: none !important;
   }
-}
-
-/* ===== CARDS DEL DASHBOARD ===== */
-.dashboard-card {
-  background: white;
-  border-radius: 0.5rem;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-  transition: all 0.2s ease-in-out;
-}
-
-.dashboard-card:hover {
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  transform: translateY(-1px);
-}
-
-/* ===== ESTADÍSTICAS ===== */
-.stat-icon {
-  border-radius: 0.375rem;
-  padding: 0.75rem;
-}
-
-.stat-number {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: #111827;
-}
-
-.stat-label {
-  font-size: 0.875rem;
-  color: #6b7280;
-  font-weight: 500;
-}
-
-/* ===== SECCIÓN DE BIENVENIDA ===== */
-.welcome-section {
-  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-  border-radius: 0.5rem;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-}
-
-.welcome-icon {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 50%;
-  padding: 0.75rem;
-}
-
-/* ===== ACCIONES RÁPIDAS ===== */
-.quick-action-card {
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.5rem;
-  padding: 1.5rem;
-  transition: all 0.2s ease-in-out;
-  cursor: pointer;
-}
-
-.quick-action-card:hover {
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  transform: translateY(-2px);
-  border-color: #4f46e5;
-}
-
-.quick-action-icon {
-  border-radius: 0.5rem;
-  padding: 0.75rem;
-  margin-bottom: 1rem;
-}
-
-/* ===== BOTÓN DE LOGOUT ===== */
-.logout-btn {
-  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
-  transition: all 0.2s ease-in-out;
-}
-
-.logout-btn:hover {
-  background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-}
-
-/* ===== ANIMACIONES DE ENTRADA ===== */
-.fade-in {
-  animation: fadeIn 0.5s ease-in-out;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
+  
+  /* Ajustes específicos para el sidebar móvil */
+  .sidebar-header {
+    height: 64px;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+
+  .user-section {
+    height: 72px;
+  }
+
+  .main-header {
+    padding-left: 1rem;
+  }
+
+  .mobile-menu-btn {
+    display: block;
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Navegación móvil mejorada */
+  .nav-scroll-container {
+    height: calc(100vh - 136px); /* Header 64px + Footer 72px */
+  }
+
+  .nav-scroll-container nav {
+    padding: 0.5rem;
+  }
+
+  .nav-scroll-container .space-y-1 > * + * {
+    margin-top: 0.25rem;
+  }
+
+  /* Enlaces más grandes para touch */
+  .nav-scroll-container a,
+  .nav-scroll-container button {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+
+  /* Prevenir zoom en inputs en móvil */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  select,
+  textarea {
+    font-size: 16px;
   }
 }
 
-.slide-in {
-  animation: slideIn 0.3s ease-out;
-}
-
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
+@media (min-width: 769px) {
+  .mobile-menu-btn {
+    display: none;
   }
 }
 
-/* ===== LOADING SPINNER ===== */
-.loading-spinner {
-  width: 3rem;
-  height: 3rem;
-  border: 2px solid #e5e7eb;
-  border-top: 2px solid #4f46e5;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* ===== ESTADOS DE ÉXITO Y ERROR ===== */
-.success-message {
-  background-color: #d1fae5;
-  border: 1px solid #a7f3d0;
-  color: #065f46;
-  padding: 1rem;
-  border-radius: 0.5rem;
-  margin-bottom: 1rem;
-}
-
-.error-message {
-  background-color: #fee2e2;
-  border: 1px solid #fecaca;
-  color: #991b1b;
-  padding: 1rem;
-  border-radius: 0.5rem;
-  margin-bottom: 1rem;
-}
-
-/* ===== INFORMACIÓN DEL USUARIO ===== */
-.user-info-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.5rem;
-}
-
-.user-info-item {
+/* ===== UTILIDADES PARA MODALS ===== */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 2000;
   display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
 }
 
-.user-info-label {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #6b7280;
+.modal-content {
+  background: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  max-height: 90vh;
+  overflow-y: auto;
+  width: 100%;
+  max-width: 48rem; /* 768px */
+  margin: auto;
+  z-index: 2010;
 }
 
-.user-info-value {
-  font-size: 0.875rem;
-  color: #111827;
+/* ===== ANIMACIONES Y TRANSICIONES ===== */
+.sidebar-toggle-btn {
+  transition: all 0.2s ease-in-out;
 }
 
-/* ===== UTILIDADES ADICIONALES ===== */
-.text-truncate {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.sidebar-toggle-btn:hover {
+  background-color: rgba(55, 65, 81, 0.8);
+  transform: scale(1.05);
 }
 
-.transition-smooth {
-  transition: all 0.3s ease-in-out;
+.user-avatar {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  transition: transform 0.2s ease-in-out;
 }
 
-.shadow-subtle {
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+.user-avatar:hover {
+  transform: scale(1.05);
 }
 
-.shadow-moderate {
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+/* ===== ACCESIBILIDAD ===== */
+@media (prefers-reduced-motion: reduce) {
+  .sidebar,
+  .main-content,
+  .sidebar-overlay,
+  .submenu-enter,
+  .tooltip-collapsed::after,
+  .tooltip-collapsed::before {
+    transition: none;
+  }
 }
 
-.shadow-strong {
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+/* ===== FOCUS STATES PARA ACCESIBILIDAD ===== */
+.sidebar-toggle-btn:focus,
+.mobile-menu-btn:focus,
+.logout-btn:focus {
+  outline: 2px solid #4f46e5;
+  outline-offset: 2px;
 }
 
-/* ===== SCROLL PERSONALIZADO PARA CONTENIDO PRINCIPAL ===== */
+.nav-scroll-container a:focus,
+.nav-scroll-container button:focus {
+  outline: 2px solid #4f46e5;
+  outline-offset: 2px;
+  border-radius: 0.375rem;
+}
+
+/* ===== SCROLL PERSONALIZADO ===== */
 .custom-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: #d1d5db #f3f4f6;
@@ -498,159 +444,12 @@
   background: #9ca3af;
 }
 
-/* ===== MEJORAS ESPECÍFICAS PARA MÓVILES ===== */
-@media (max-width: 768px) {
-  /* Hacer el sidebar completamente funcional en móvil */
-  .sidebar {
-    -webkit-transform: translateX(-100%);
-    transform: translateX(-100%);
-  }
-
-  .sidebar-mobile-open {
-    -webkit-transform: translateX(0);
-    transform: translateX(0);
-  }
-
-  /* Asegurar que el contenido no se solape */
-  .main-content {
-    width: 100%;
-    margin-left: 0;
-  }
-
-  /* Mejorar la navegación en móvil */
-  .nav-scroll-container {
-    height: calc(100vh - 136px); /* Header 64px + Footer 72px */
-  }
-
-  /* Mejorar botones en móvil */
-  .sidebar-toggle-btn {
-    min-width: 44px;
-    min-height: 44px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  /* Espaciado mejor en móvil */
-  .nav-scroll-container nav {
-    padding: 0.5rem;
-  }
-
-  .nav-scroll-container .space-y-1 > * + * {
-    margin-top: 0.25rem;
-  }
-
-  /* Enlaces más grandes para tocar en móvil */
-  .nav-scroll-container a,
-  .nav-scroll-container button {
-    min-height: 44px;
-    display: flex;
-    align-items: center;
-  }
-
-  /* Prevenir zoom en inputs en móvil */
-  input[type="text"],
-  input[type="email"],
-  input[type="password"],
-  select,
-  textarea {
-    font-size: 16px;
-  }
-}
-
-/* ===== MEDIA QUERIES PARA MEJORAR LA RESPONSIVIDAD ===== */
-@media (max-width: 1024px) {
-  .dashboard-stats {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  .quick-actions {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 640px) {
-  .dashboard-stats {
-    grid-template-columns: 1fr;
-  }
-  
-  .quick-actions {
-    grid-template-columns: 1fr;
-  }
-  
-  .user-info-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .main-header h1 {
-    font-size: 1.125rem;
-  }
-  
-  .welcome-section h2 {
-    font-size: 1.25rem;
-  }
-
-  /* Ajustes específicos para pantallas muy pequeñas */
-  .sidebar-header {
-    padding: 1rem;
-  }
-
-  .user-section {
-    padding: 1rem;
-  }
-
-  .content-area {
-    padding: 1rem;
-  }
-}
-
-/* ===== ACCESIBILIDAD ===== */
-@media (prefers-reduced-motion: reduce) {
-  .sidebar,
-  .main-content,
-  .sidebar-overlay,
-  .submenu-enter,
-  .tooltip-collapsed::after,
-  .tooltip-collapsed::before {
-    transition: none;
-  }
-
-  .fade-in,
-  .slide-in {
-    animation: none;
-  }
-}
-
-/* ===== FOCUS STATES PARA ACCESIBILIDAD ===== */
-.sidebar-toggle-btn:focus,
-.mobile-menu-btn:focus,
-.logout-btn:focus {
-  outline: 2px solid #4f46e5;
-  outline-offset: 2px;
-}
-
-.nav-scroll-container a:focus,
-.nav-scroll-container button:focus {
-  outline: 2px solid #4f46e5;
-  outline-offset: 2px;
-  border-radius: 0.375rem;
-}
-
-/* ===== HIGH CONTRAST MODE ===== */
-@media (prefers-contrast: high) {
-  .sidebar {
-    background: #000000;
-    border-right: 2px solid #ffffff;
-  }
-
-  .nav-scroll-container a,
-  .nav-scroll-container button {
-    border: 1px solid #ffffff;
-  }
-
-  .nav-scroll-container a:hover,
-  .nav-scroll-container button:hover {
-    background-color: #ffffff;
-    color: #000000;
-  }
-}
+/* ===== Z-INDEX HIERARCHY (DOCUMENTACIÓN) =====
+100  - Header principal
+1000 - Sidebar desktop
+1040 - Overlay sidebar móvil  
+1050 - Sidebar móvil
+1100 - Tooltips
+2000 - Modal overlays
+2010 - Modal content
+================================================= */
